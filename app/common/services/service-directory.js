@@ -5,5 +5,9 @@ export default {
 
     register: {
         url: '/lux/register'
+    },
+
+    refresh: {
+        url: '/lux/refresh'
     }
 }

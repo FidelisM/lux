@@ -30,6 +30,39 @@ router.get('/lux/users', function (request, response) {
     }
 });
 
+router.get('/lux/refresh', function (request, response) {
+    let token = getToken(request.headers);
+
+    if (token) {
+        jwt.verify(token, config.secret, function(err) {
+            if (err) {
+                return response.status(403).send({
+                    success: false,
+                    msg: 'Unauthorized.'
+                });
+            }
+
+            token = jwt.sign({
+                username: request.body.username,
+                password: request.body.password
+            }, config.secret, {
+                expiresIn: 3600 // in seconds
+            });
+
+            response.send({
+                success: true,
+                message: 'Refresh successful. Welcome to the show.',
+                token: 'Bearer ' + token
+            });
+        });
+    } else {
+        return response.status(403).send({
+            success: false,
+            msg: 'Unauthorized.'
+        });
+    }
+});
+
 router.post('/lux/register', function (request, response) {
     if (request.body.email && request.body.username && request.body.password) {
         let userData = {
@@ -82,7 +115,7 @@ router.post('/lux/login', function (request, response) {
                     }, config.secret, {
                         expiresIn: 3600 // in seconds
                     });
-                    debugger
+
                     response.json({
                         success: true,
                         token: 'Bearer ' + token
@@ -95,10 +128,6 @@ router.post('/lux/login', function (request, response) {
                 }
             });
         })
-
-        /*db.collection('users').find(userData).toArray(function (err, results) {
-            (err) ? response.send({err: err}) : response.send({success: true, data: results});
-        })*/
     } else {
         response.send(500);
     }

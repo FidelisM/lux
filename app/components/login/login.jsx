@@ -2,19 +2,17 @@ import React from 'react';
 import services from 'Services';
 import serviceManager from 'ServiceManager';
 
+import PropTypes from 'prop-types';
+import {push} from 'react-router-redux';
+import {connect} from 'react-redux';
+import {withRouter} from 'react-router-dom';
+
 import loginStyles from './login.css'
 
-export class Login extends React.Component {
+class Login extends React.Component {
 
     constructor(props) {
         super(props);
-        this.state = {
-            username: '',
-            password: '',
-            passwordConfirm: '',
-            email: '',
-            tel: ''
-        };
     }
 
     toggleLoginRegister(evt) {
@@ -33,16 +31,17 @@ export class Login extends React.Component {
     }
 
     handleRegisterButtonClick() {
-        let options = {
-            data: {
-                username: this.state.username,
-                password: this.state.password,
-                passwordConfirm: this.state.passwordConfirm,
-                email: this.state.email,
-                tel: this.state.tel
-            },
-            url: services.register.url
-        };
+        let state = this.context.store.getState().authReducer,
+            options = {
+                data: {
+                    username: state.username,
+                    password: state.password,
+                    passwordConfirm: state.passwordConfirm,
+                    email: state.email,
+                    tel: state.tel
+                },
+                url: services.register.url
+            };
 
         serviceManager.post(options).then(function (response) {
             debugger
@@ -52,29 +51,38 @@ export class Login extends React.Component {
     }
 
     handleLoginButtonClick() {
-        let options = {
-            data: {
-                username: this.state.username,
-                password: this.state.password
-            },
-            url: services.login.url
-        };
+        let self = this,
+            state = this.context.store.getState().authReducer,
+            options = {
+                data: {
+                    username: state.username,
+                    password: state.password
+                },
+                url: services.login.url
+            };
 
         serviceManager.post(options).then(function (response) {
             localStorage.setItem('token', JSON.stringify(response.token));
+
+            self.props.dispatch({
+                type: 'SET_AUTH',
+                auth: response.token
+            });
+
+            self.context.store.dispatch(push('/home'));
         }).catch(function (response) {
-            debugger
         });
     }
 
     handleInputChange(evt) {
         let inputField = evt.currentTarget,
-            key = inputField.getAttribute('data-field'),
-            stateObj = {};
+            strAction = inputField.getAttribute('data-action'),
+            strKey = inputField.getAttribute('data-field'),
+            stateObj = {type: 'SET_' + strAction};
 
-        stateObj[key] = inputField.value;
+        stateObj[strKey] = inputField.value;
 
-        this.setState(stateObj);
+        this.props.dispatch(stateObj);
     }
 
     render() {
@@ -87,10 +95,10 @@ export class Login extends React.Component {
                     <div className="form active login-form">
                         <h2>Login to your account</h2>
                         <div className="login-info">
-                            <input type="text" placeholder="Username" className="login-username" data-field="username"
-                                   value={this.state.username} onChange={this.handleInputChange.bind(this)}/>
+                            <input type="text" placeholder="Username" className="login-username" data-action="USERNAME"
+                                   data-field="username" onChange={this.handleInputChange.bind(this)}/>
                             <input type="password" placeholder="Password" className="login-password"
-                                   data-field="password" value={this.state.password}
+                                   data-field="password" data-action="PASSWORD"
                                    onChange={this.handleInputChange.bind(this)}/>
                             <button onClick={this.handleLoginButtonClick.bind(this)}>Login</button>
                         </div>
@@ -99,19 +107,19 @@ export class Login extends React.Component {
                         <h2>Create an account</h2>
                         <div className="register-info">
                             <input type="text" placeholder="Username" className="register-username"
-                                   data-field="username" value={this.state.username}
+                                   data-action="USERNAME" data-field="username"
                                    onChange={this.handleInputChange.bind(this)}/>
                             <input type="password" placeholder="Password" className="register-password"
-                                   data-field="password" value={this.state.password}
+                                   data-action="PASSWORD" data-field="password"
                                    onChange={this.handleInputChange.bind(this)}/>
                             <input type="password" placeholder="Confirm Password" className="conf-register-password"
-                                   data-field="passwordConfirm" value={this.state.passwordConfirm}
+                                   data-action="CONF_PASSWORD" data-field="passwordConfirm"
                                    onChange={this.handleInputChange.bind(this)}/>
                             <input type="email" placeholder="Email Address" className="register-email"
-                                   data-field="email" value={this.state.email}
+                                   data-action="EMAIL" data-field="email"
                                    onChange={this.handleInputChange.bind(this)}/>
-                            <input type="tel" placeholder="Phone Number" className="register-tel" data-field="tel"
-                                   value={this.state.tel} onChange={this.handleInputChange.bind(this)}/>
+                            <input type="tel" placeholder="Phone Number" className="register-tel" data-action="TEL"
+                                   data-field="tel" onChange={this.handleInputChange.bind(this)}/>
                             <button onClick={this.handleRegisterButtonClick.bind(this)}>Register</button>
                         </div>
                     </div>
@@ -121,3 +129,29 @@ export class Login extends React.Component {
         );
     }
 }
+
+Login.propTypes = {
+    email: PropTypes.string,
+    password: PropTypes.string,
+    passwordConfirm: PropTypes.string,
+    username: PropTypes.string,
+    tel: PropTypes.string,
+    auth: PropTypes.object
+};
+
+Login.contextTypes = {
+    store: PropTypes.object
+};
+
+function mapStateToProps(state) {
+    return {
+        email: state.email,
+        password: state.password,
+        passwordConfirm: state.password,
+        username: state.password,
+        tel: state.password,
+        auth: state.auth
+    };
+}
+
+export default withRouter(connect(mapStateToProps)(Login));
