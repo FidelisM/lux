@@ -31,7 +31,8 @@ class Login extends React.Component {
     }
 
     handleRegisterButtonClick() {
-        let state = this.context.store.getState().authReducer,
+        let self = this,
+            state = this.context.store.getState().authReducer,
             options = {
                 data: {
                     username: state.username,
@@ -44,15 +45,12 @@ class Login extends React.Component {
             };
 
         serviceManager.post(options).then(function (response) {
-            debugger
-        }).catch(function (response) {
-            debugger
-        });
+            (response.success) ? self._handleAuthSuccess(response) : self._handleAuthFailure();
+        }).catch(this._handleAuthFailure.bind(this));
     }
 
     handleLoginButtonClick() {
-        let self = this,
-            state = this.context.store.getState().authReducer,
+        let state = this.context.store.getState().authReducer,
             options = {
                 data: {
                     username: state.username,
@@ -62,16 +60,8 @@ class Login extends React.Component {
             };
 
         serviceManager.post(options).then(function (response) {
-            localStorage.setItem('token', JSON.stringify(response.token));
-
-            self.props.dispatch({
-                type: 'SET_AUTH',
-                auth: response.token
-            });
-
-            self.context.store.dispatch(push('/home'));
-        }).catch(function (response) {
-        });
+            (response.success) ? self._handleAuthSuccess() : self._handleAuthFailure();
+        }).catch(this._handleAuthFailure.bind(this));
     }
 
     handleInputChange(evt) {
@@ -83,6 +73,32 @@ class Login extends React.Component {
         stateObj[strKey] = inputField.value;
 
         this.props.dispatch(stateObj);
+    }
+
+    _handleAuthSuccess(response) {
+        let self = this;
+
+        localStorage.setItem('token', JSON.stringify(response.token));
+
+        self.props.dispatch({
+            type: 'SET_AUTH',
+            auth: response.token
+        });
+
+        self.context.store.dispatch(push('/home'));
+    }
+
+    _handleAuthFailure() {
+        let self = this;
+
+        localStorage.removeItem('token');
+
+        self.props.dispatch({
+            type: 'SET_AUTH',
+            auth: {}
+        });
+
+        self.context.store.dispatch(push('/login'));
     }
 
     render() {
