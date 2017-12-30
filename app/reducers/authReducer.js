@@ -22,7 +22,7 @@ export default function authReducer(state = defaultState, action) {
         case 'SET_CONF_PASSWORD':
             return {
                 ...state,
-                password: action.passwordConfirm
+                passwordConfirm: action.passwordConfirm
             };
         case 'SET_USERNAME':
             return {

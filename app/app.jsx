@@ -12,9 +12,13 @@ import reducers from './reducers/rootReducer';
 import {createStore, applyMiddleware} from 'redux'
 import {ConnectedRouter, routerReducer, routerMiddleware} from 'react-router-redux'
 import {Provider} from 'react-redux';
-import createHistory from 'history/createHashHistory'
+import createHashHistory from 'history/createHashHistory'
 
-const history = createHistory();
+import services from 'Services';
+import serviceManager from 'ServiceManager';
+import Fingerprint2 from "fingerprintjs2";
+
+const history = createHashHistory();
 const middleware = routerMiddleware(history);
 
 Object.assign(reducers, routerReducer);
@@ -31,7 +35,7 @@ const App = function () {
                             <Route exact path='/' component={Login}/>
                             <Route path='/login' component={Login}/>
                             <Route path='/home' render={(props) => (
-                                authenticateUser() ? <Greeter {...props} /> : <Redirect to='/login'/>
+                                isAuthentic() ? <Greeter {...props} /> : <Redirect to='/login'/>
                             )}/>
                         </Switch>
                     </HashRouter>
@@ -41,9 +45,45 @@ const App = function () {
     )
 };
 
-const authenticateUser = function () {
+const isAuthentic = function () {
     let state = store.getState();
     return (!_.isEmpty(state.authReducer.auth))
 };
 
-ReactDOM.render(<App/>, document.getElementById('app'));
+const authenticateUser = function () {
+    let token = localStorage.getItem('token'),
+        options = {
+            headers: {
+                Authorization: token
+            },
+            url: services.refresh.url
+        };
+
+    //memory leak?
+    new Fingerprint2().get(function (result) {
+        options.headers.browser = result;
+
+        serviceManager.get(options).then(function (response) {
+            if (response.token) {
+                localStorage.setItem('token', response.token);
+
+                store.dispatch({
+                    type: 'SET_AUTH',
+                    auth: response.token
+                });
+
+                store.dispatch({
+                    type: 'SET_USER',
+                    username: response.username
+                });
+            }
+            renderApplication();
+        }).catch(renderApplication);
+    });
+};
+
+const renderApplication = function () {
+    ReactDOM.render(<App/>, document.getElementById('app'));
+};
+
+authenticateUser();

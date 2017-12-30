@@ -10,7 +10,7 @@ router.get('/lux/users', function (request, response) {
         token = getToken(request.headers);
 
     if (token) {
-        jwt.verify(token, config.secret, function(err) {
+        jwt.verify(token, config.secret, function (err) {
             if (err) {
                 return response.status(403).send({
                     success: false,
@@ -31,30 +31,46 @@ router.get('/lux/users', function (request, response) {
 });
 
 router.get('/lux/refresh', function (request, response) {
-    let token = getToken(request.headers);
+    let token = getToken(request.headers),
+        browser = request.headers.browser;
 
     if (token) {
-        jwt.verify(token, config.secret, function(err) {
-            if (err) {
-                return response.status(403).send({
-                    success: false,
-                    msg: 'Unauthorized.'
+        let decoded = jwt.verify(token, config.secret),
+            db = router.getDB();
+
+        if ((decoded.username && decoded.password) && (decoded.browser === browser)) {
+            db.collection('users').findOne({username: decoded.username}, function (err, result) {
+                let user = new userSchema(result);
+
+                user.comparePassword(decoded.password, function (err, isMatch) {
+                    if (isMatch && !err) {
+                        let token = jwt.sign({
+                            username: decoded.username,
+                            password: decoded.password,
+                            browser: decoded.browser
+                        }, config.secret, {
+                            expiresIn: 3600 // in seconds
+                        });
+
+                        response.json({
+                            success: true,
+                            username: decoded.username,
+                            token: 'Bearer ' + token
+                        });
+                    } else {
+                        response.send({
+                            success: false,
+                            message: 'Authentication failed. Passwords did not match.'
+                        });
+                    }
                 });
-            }
-
-            token = jwt.sign({
-                username: request.body.username,
-                password: request.body.password
-            }, config.secret, {
-                expiresIn: 3600 // in seconds
+            })
+        } else {
+            return response.status(403).send({
+                success: false,
+                msg: 'Unauthorized.'
             });
-
-            response.send({
-                success: true,
-                message: 'Refresh successful. Welcome to the show.',
-                token: 'Bearer ' + token
-            });
-        });
+        }
     } else {
         return response.status(403).send({
             success: false,
@@ -64,7 +80,7 @@ router.get('/lux/refresh', function (request, response) {
 });
 
 router.post('/lux/register', function (request, response) {
-    if (request.body.email && request.body.username && request.body.password) {
+    if (request.body.email && request.body.username && request.body.password && request.body.browser) {
         let userData = {
                 email: request.body.email,
                 username: request.body.username,
@@ -83,7 +99,8 @@ router.post('/lux/register', function (request, response) {
 
             let token = jwt.sign({
                 username: request.body.username,
-                password: request.body.password
+                password: request.body.password,
+                browser: request.body.browser
             }, config.secret, {
                 expiresIn: 3600 // in seconds
             });
@@ -91,6 +108,7 @@ router.post('/lux/register', function (request, response) {
             response.send({
                 success: true,
                 message: 'Registration successful. Welcome to lite show.',
+                username: request.body.username,
                 token: 'Bearer ' + token
             });
         })
@@ -100,7 +118,7 @@ router.post('/lux/register', function (request, response) {
 });
 
 router.post('/lux/login', function (request, response) {
-    if (request.body.username && request.body.password) {
+    if (request.body.username && request.body.password && request.body.browser) {
         let db = router.getDB();
 
         db.collection('users').findOne({username: request.body.username}, function (err, result) {
@@ -111,13 +129,15 @@ router.post('/lux/login', function (request, response) {
                     // Create token if the password matched and no error was thrown
                     let token = jwt.sign({
                         username: request.body.username,
-                        password: request.body.password
+                        password: request.body.password,
+                        browser: request.body.browser
                     }, config.secret, {
                         expiresIn: 3600 // in seconds
                     });
 
                     response.json({
                         success: true,
+                        username: request.body.username,
                         token: 'Bearer ' + token
                     });
                 } else {

@@ -7,6 +7,8 @@ import {push} from 'react-router-redux';
 import {connect} from 'react-redux';
 import {withRouter} from 'react-router-dom';
 
+import kute from 'kute.js'
+import Fingerprint2 from 'fingerprintjs2'
 import loginStyles from './login.css'
 
 class Login extends React.Component {
@@ -18,13 +20,17 @@ class Login extends React.Component {
     toggleLoginRegister(evt) {
         let button = evt.currentTarget,
             activeView = document.querySelector('.form.active'),
-            hiddenView = document.querySelector('.form:not(.active)');
+            hiddenView = document.querySelector('.form:not(.active)'),
+            activeViewTween = kute.fromTo('.form.active', {opacity: 1}, {opacity: 0}),
+            hiddenViewTween = kute.fromTo('.form:not(.active)', {opacity: 0}, {opacity: 1});
 
         if (activeView.classList.contains('login-form')) {
             button.querySelector('.info-tip').innerHTML = 'Login';
         } else {
             button.querySelector('.info-tip').innerHTML = 'Register';
         }
+        activeViewTween.start();
+        hiddenViewTween.start();
 
         activeView.classList.remove('active');
         hiddenView.classList.add('active');
@@ -44,13 +50,18 @@ class Login extends React.Component {
                 url: services.register.url
             };
 
-        serviceManager.post(options).then(function (response) {
-            (response.success) ? self._handleAuthSuccess(response) : self._handleAuthFailure();
-        }).catch(this._handleAuthFailure.bind(this));
+        new Fingerprint2().get(function(result){
+            options.data.browser = result;
+
+            serviceManager.post(options).then(function (response) {
+                (response.success) ? self._handleAuthSuccess(response) : self._handleAuthFailure(response);
+            }).catch(self._handleAuthFailure.bind(self));
+        });
     }
 
     handleLoginButtonClick() {
-        let state = this.context.store.getState().authReducer,
+        let self = this,
+            state = this.context.store.getState().authReducer,
             options = {
                 data: {
                     username: state.username,
@@ -59,9 +70,14 @@ class Login extends React.Component {
                 url: services.login.url
             };
 
-        serviceManager.post(options).then(function (response) {
-            (response.success) ? self._handleAuthSuccess() : self._handleAuthFailure();
-        }).catch(this._handleAuthFailure.bind(this));
+        //memory leak?
+        new Fingerprint2().get(function(result){
+            options.data.browser = result;
+
+            serviceManager.post(options).then(function (response) {
+                (response.success) ? self._handleAuthSuccess(response) : self._handleAuthFailure(response);
+            }).catch(self._handleAuthFailure.bind(self));
+        });
     }
 
     handleInputChange(evt) {
@@ -78,11 +94,16 @@ class Login extends React.Component {
     _handleAuthSuccess(response) {
         let self = this;
 
-        localStorage.setItem('token', JSON.stringify(response.token));
+        localStorage.setItem('token', response.token);
 
         self.props.dispatch({
             type: 'SET_AUTH',
             auth: response.token
+        });
+
+        self.props.dispatch({
+            type: 'SET_USER',
+            username: response.username
         });
 
         self.context.store.dispatch(push('/home'));
@@ -97,8 +118,6 @@ class Login extends React.Component {
             type: 'SET_AUTH',
             auth: {}
         });
-
-        self.context.store.dispatch(push('/login'));
     }
 
     render() {

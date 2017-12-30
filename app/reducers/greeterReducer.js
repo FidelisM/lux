@@ -1,5 +1,6 @@
 const defaultState = {
-    message: 'Lux'
+    message: 'Lux',
+    username: 'User'
 };
 
 export default function greeterReducer(state = defaultState, action) {
@@ -8,6 +9,11 @@ export default function greeterReducer(state = defaultState, action) {
             return {
                 ...state,
                 message: action.message
+            };
+        case 'SET_USER':
+            return {
+                ...state,
+                username: action.username
             };
         default:
             return state;
