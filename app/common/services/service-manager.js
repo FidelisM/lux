@@ -14,7 +14,15 @@ export default {
         });
 
         return promise.then(function (response) {
-            return response.json();
+           if (!response.ok) {
+               return Promise.reject(response.json().then(function(data) {
+                   throw Error(data.msg);
+                }));
+            } else {
+               return response.json();
+           }
+        }).catch(function (error) {
+            return error;
         });
     },
 
@@ -29,7 +37,15 @@ export default {
         });
 
         return promise.then(function (response) {
-            return response.json();
+            if (!response.ok) {
+                return Promise.reject(response.json().then(function(data) {
+                    throw Error(data.msg);
+                }));
+            } else {
+                return response.json();
+            }
+        }).catch(function (error) {
+            return error;
         });
     }
 }

@@ -1,6 +1,7 @@
 const defaultState = {
     message: 'Lux',
-    username: 'User'
+    username: 'User',
+    drawerOpen: false
 };
 
 export default function greeterReducer(state = defaultState, action) {
@@ -14,6 +15,11 @@ export default function greeterReducer(state = defaultState, action) {
             return {
                 ...state,
                 username: action.username
+            };
+        case 'SET_DRAWER':
+            return {
+                ...state,
+                drawerOpen: action.drawerOpen
             };
         default:
             return state;

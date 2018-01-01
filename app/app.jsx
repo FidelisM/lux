@@ -6,6 +6,7 @@ import {HashRouter, Route, Switch, Redirect} from 'react-router-dom'
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 
 import Login from 'Components/login/login';
+import AlertDialog from 'Widgets/alertDialog/alertDialog';
 import Greeter from 'Components/greeter/greeter';
 import reducers from './reducers/rootReducer';
 
@@ -25,17 +26,17 @@ Object.assign(reducers, routerReducer);
 
 const store = createStore((reducers), applyMiddleware(middleware));
 
-const App = function () {
+const App = function (appProps) {
     return (
-        <Provider store={store}>
+        <Provider store={store} >
             <MuiThemeProvider>
                 <ConnectedRouter history={history}>
                     <HashRouter>
-                        <Switch>
+                        <Switch >
                             <Route exact path='/' component={Login}/>
                             <Route path='/login' component={Login}/>
                             <Route path='/home' render={(props) => (
-                                isAuthentic() ? <Greeter {...props} /> : <Redirect to='/login'/>
+                                isAuthentic() ? <Greeter {...props} /> : <AlertDialog message={appProps.error}/>
                             )}/>
                         </Switch>
                     </HashRouter>
@@ -78,12 +79,14 @@ const authenticateUser = function () {
                 });
             }
             renderApplication();
-        }).catch(renderApplication);
+        }).catch(function (error) {
+            renderApplication(error)
+        });
     });
 };
 
-const renderApplication = function () {
-    ReactDOM.render(<App/>, document.getElementById('app'));
+const renderApplication = function (error) {
+    ReactDOM.render(<App error={error.message}/>, document.getElementById('app'));
 };
 
 authenticateUser();

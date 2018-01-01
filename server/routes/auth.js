@@ -32,11 +32,25 @@ router.get('/lux/users', function (request, response) {
 
 router.get('/lux/refresh', function (request, response) {
     let token = getToken(request.headers),
-        browser = request.headers.browser;
+        browser = request.headers.browser,
+        db = router.getDB();
 
     if (token) {
-        let decoded = jwt.verify(token, config.secret),
-            db = router.getDB();
+        jwt.verify(token, config.secret, handleSuccess);
+    } else {
+        return response.status(401).send({
+            success: false,
+            msg: 'You need to be logged in to see this.'
+        });
+    }
+
+    function handleSuccess(err, decoded) {
+        if (err) {
+            return response.status(401).send({
+                success: false,
+                msg: 'Your session has expired, please log in to continue.'
+            });
+        }
 
         if ((decoded.username && decoded.password) && (decoded.browser === browser)) {
             db.collection('users').findOne({username: decoded.username}, function (err, result) {
@@ -58,24 +72,19 @@ router.get('/lux/refresh', function (request, response) {
                             token: 'Bearer ' + token
                         });
                     } else {
-                        response.send({
+                        return response.status(401).send({
                             success: false,
-                            message: 'Authentication failed. Passwords did not match.'
+                            msg: 'Your session has expired, please log in to continue.'
                         });
                     }
                 });
             })
         } else {
-            return response.status(403).send({
+            return response.status(401).send({
                 success: false,
-                msg: 'Unauthorized.'
+                msg: 'Your session has expired, please log in to continue.'
             });
         }
-    } else {
-        return response.status(403).send({
-            success: false,
-            msg: 'Unauthorized.'
-        });
     }
 });
 
