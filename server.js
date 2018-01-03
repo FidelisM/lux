@@ -28,7 +28,7 @@ mongoose.connect(config.database, {useMongoClient: true}).then(function () {
     app.use(authRouter);
     
     app.listen(port, function () {
-        console.log('Server is running on http://localhost:3000')
+        console.log('Server is running on port: ' + port)
     });
 }, function (err) {
     console.log(err);
