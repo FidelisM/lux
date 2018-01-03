@@ -9,7 +9,8 @@ const express = require('express'),
     authRouter = require('./server/routes/auth');
 
 const app = express(),
-    router = express.Router();
+      router = express.Router(),
+      port = process.env.PORT || 3000;
 
 router.use(express.static('dist'));
 passport.use(strategy);
@@ -25,8 +26,8 @@ mongoose.connect(config.database, {useMongoClient: true}).then(function () {
 
     app.use(router);
     app.use(authRouter);
-
-    app.listen(3000, function () {
+    
+    app.listen(port, function () {
         console.log('Server is running on http://localhost:3000')
     });
 }, function (err) {
