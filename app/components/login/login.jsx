@@ -50,9 +50,14 @@ class Login extends React.Component {
                 url: services.register.url
             };
 
-        serviceManager.post(options).then(function (response) {
-            (response.success) ? self._handleAuthSuccess(response) : self._handleAuthFailure();
-        }).catch(this._handleAuthFailure.bind(this));
+        //memory leak?
+        new Fingerprint2().get(function(result){
+            options.data.browser = result;
+
+            serviceManager.post(options).then(function (response) {
+                (response.success) ? self._handleAuthSuccess(response) : self._handleAuthFailure(response);
+            }).catch(self._handleAuthFailure.bind(self));
+        });
     }
 
     handleLoginButtonClick() {
