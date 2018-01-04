@@ -24,13 +24,17 @@ import AppBar from 'material-ui/AppBar';
 import Divider from 'material-ui/Divider';
 import TextField from 'material-ui/TextField';
 import Subheader from 'material-ui/Subheader';
+import IconButton from 'material-ui/IconButton';
 
-import Person from 'material-ui/svg-icons/social/person';
-import PplOutline from 'material-ui/svg-icons/social/people-outline';
-import Chat from 'material-ui/svg-icons/communication/chat';
-import Add from 'material-ui/svg-icons/content/add';
-import Refresh from 'material-ui/svg-icons/navigation/refresh';
+import PersonIcon from 'material-ui/svg-icons/social/person';
+import PplOutlineIcon from 'material-ui/svg-icons/social/people-outline';
+import AddIcon from 'material-ui/svg-icons/content/add';
+import PencilIcon from 'material-ui/svg-icons/content/create';
+import BlockIcon from 'material-ui/svg-icons/content/block';
+import RefreshIcon from 'material-ui/svg-icons/navigation/refresh';
 import HelpIcon from 'material-ui/svg-icons/action/help';
+import InfoIcon from 'material-ui/svg-icons/action/info-outline';
+import DeleteIcon from 'material-ui/svg-icons/action/delete-forever';
 
 import './greeter.css';
 
@@ -44,6 +48,17 @@ const flatButtonStyles = {
 
 const iconMenuStyles = {
     marginTop: '5px'
+};
+
+const convoInfoIconStyles = {
+    fill: 'rgb(117, 117, 117)',
+};
+
+const convoIconMenuStyles = {
+    width: 24,
+    height: 24,
+    padding: 0,
+    fill: 'rgb(117, 117, 117)',
 };
 
 class Greeter extends React.Component {
@@ -136,6 +151,8 @@ class Greeter extends React.Component {
             type: 'SET_RM_LIST',
             rooms: response.rooms
         });
+
+        this.forceUpdate();
     }
 
     _handleCreateFailure(response) {
@@ -201,17 +218,19 @@ class Greeter extends React.Component {
                     </AppBar>
                 </div>
                 <div className='drawer'>
-                    <Drawer open={this.context.store.getState().greeterReducer.drawerOpen}
+                    <Drawer open={this.context.store.getState().greeterReducer.drawerOpen} width={350}
                             containerStyle={{height: 'calc(100% - 74px)', top: 74, left: 8}}>
-                        <MenuItem onClick={this.createRoom.bind(this)} rightIcon={<Add/>}>Create Room</MenuItem>
+                        <MenuItem onClick={this.createRoom.bind(this)} rightIcon={<AddIcon/>}>Create Room</MenuItem>
                         <Divider/>
-                        <Subheader>Conversations</Subheader>
+                        <Subheader>Conversations
+                            ({this.context.store.getState().greeterReducer.rooms.length})</Subheader>
                         <List>
                             {this.context.store.getState().greeterReducer.rooms.map((room) =>
                                 (<div key={room._id}>
                                     <ListItem onClick={this.openRoom.bind(this, room)}
-                                              rightIcon={<Chat/>} primaryText={room.name}
+                                              rightIcon={<ConversationMenu/>} primaryText={room.name}
                                               secondaryText={moment(room.updatedAt).format('MMM Do YYYY, h:mm a')}/>
+                                    <Divider inset={true}/>
                                 </div>)
                             )}
                         </List>
@@ -227,12 +246,24 @@ class Greeter extends React.Component {
 const Logged = (props) => (
     <IconMenu {...props} style={iconMenuStyles}
               iconButtonElement={<FlatButton label={props.label} style={flatButtonStyles}
-                                             icon={<Person style={personIconStyles}/>}/>}
+                                             icon={<PersonIcon style={personIconStyles}/>}/>}
               targetOrigin={{horizontal: 'right', vertical: 'top'}}
               anchorOrigin={{horizontal: 'right', vertical: 'bottom'}}>
-        <MenuItem onClick={props['data-refresh']} primaryText='Refresh' rightIcon={<Refresh/>}/>
+        <MenuItem onClick={props['data-refresh']} primaryText='Refresh' rightIcon={<RefreshIcon/>}/>
         <MenuItem onClick={props['data-help']} primaryText='Help' rightIcon={<HelpIcon/>}/>
-        <MenuItem onClick={props['data-logout']} primaryText='Log Out' rightIcon={<PplOutline/>}/>
+        <MenuItem onClick={props['data-logout']} primaryText='Log Out' rightIcon={<BlockIcon/>}/>
+    </IconMenu>
+);
+
+const ConversationMenu = (props) => (
+    <IconMenu {...props} iconButtonElement={<IconButton style={convoIconMenuStyles} onClick={(evt) => {
+        evt.stopPropagation()
+    }}><div><InfoIcon style={convoInfoIconStyles}/></div></IconButton>}
+              targetOrigin={{horizontal: 'left', vertical: 'top'}}
+              anchorOrigin={{horizontal: 'left', vertical: 'bottom'}}>
+        <MenuItem onClick={props['data-rename']} primaryText='Rename Room' rightIcon={<PencilIcon/>}/>
+        <MenuItem onClick={props['data-delete']} primaryText='Delete Room' rightIcon={<DeleteIcon/>}/>
+        <MenuItem onClick={props['data-editUsers']} primaryText='Edit Members' rightIcon={<PplOutlineIcon/>}/>
     </IconMenu>
 );
 
