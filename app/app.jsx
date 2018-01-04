@@ -36,7 +36,7 @@ const App = function (appProps) {
                             <Route exact path='/' component={Login}/>
                             <Route path='/login' component={Login}/>
                             <Route path='/home' render={(props) => (
-                                isAuthentic() ? <Greeter {...props} /> : <AlertDialog message={appProps.error}/>
+                                isAuthentic() ? <Greeter {...props} /> : <AlertDialog width={500} message={appProps.error}/>
                             )}/>
                         </Switch>
                     </HashRouter>

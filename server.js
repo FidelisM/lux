@@ -6,14 +6,17 @@ const express = require('express'),
 
     strategy = require('./server/dbconfig/strategy'),
     config = require('./server/dbconfig/database'),
-    authRouter = require('./server/routes/auth');
+    authRouter = require('./server/routes/auth'),
+    convoRouter = require('./server/routes/convo');
 
 const app = express(),
-      router = express.Router(),
-      port = process.env.PORT || 3000;
+    router = express.Router(),
+    customRouters = [authRouter, convoRouter],
+    port = process.env.PORT || 3000;
 
 router.use(express.static('dist'));
-passport.use(strategy);
+passport.use('custom-jwt', strategy);
+
 
 mongoose.connect(config.database, {useMongoClient: true}).then(function () {
     app.use(morgan('dev'));
@@ -24,11 +27,12 @@ mongoose.connect(config.database, {useMongoClient: true}).then(function () {
     app.use(bodyParser.json());
     app.use(passport.initialize());
 
-    app.use(router);
     app.use(authRouter);
-    
+    app.use(convoRouter);
+    app.use(router);
+
     app.listen(port, function () {
-        console.log('Server is running on port: ' + port)
+        console.log('Server is running on port: ' + port);
     });
 }, function (err) {
     console.log(err);
@@ -36,6 +40,12 @@ mongoose.connect(config.database, {useMongoClient: true}).then(function () {
 
 mongoose.Promise = global.Promise;
 
-authRouter.getDB = function () {
-    return mongoose.connection;
-};
+for (let index = 0; index < customRouters.length; index++) {
+    customRouters[index].getDB = function () {
+        return mongoose.connection;
+    };
+
+    customRouters[index].getPassport = function () {
+        return passport;
+    };
+}

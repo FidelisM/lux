@@ -1,5 +1,5 @@
 const express = require('express'),
-    userSchema = require('../schema/users'),
+    userSchema = require('../schema/user'),
     config = require('../dbconfig/database'),
     jwt = require('jsonwebtoken');
 

@@ -9,5 +9,9 @@ export default {
 
     refresh: {
         url: '/lux/refresh'
+    },
+    room: {
+        create: '/lux/convo/create',
+        allRooms: '/lux/convo'
     }
 }

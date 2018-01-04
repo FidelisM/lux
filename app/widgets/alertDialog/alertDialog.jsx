@@ -17,7 +17,7 @@ class AlertDialog extends React.Component {
     render() {
         return (
             <div>
-                <Dialog actions={<FlatButton label="Login" onClick={this.handleClose.bind(this)}/>}
+                <Dialog contentStyle={{width: this.props.width}} actions={<FlatButton label="Login" onClick={this.handleClose.bind(this)}/>}
                         primary={true} open={true} onClick={this.handleClose.bind(this)}>{this.props.message}</Dialog>
             </div>
         );

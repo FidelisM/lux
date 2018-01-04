@@ -1,28 +1,32 @@
-const JwtStrategy = require('passport-jwt').Strategy,
-    ExtractJwt = require('passport-jwt').ExtractJwt;
+/*global require*/
 
-// load up the user model
-const userModel = require('../schema/users'),
-    config = require('./database'); // get db config file
+const CustomStrategy = require('passport-custom').Strategy,
+    jwt = require('jsonwebtoken');
 
-const strategy = function (passport) {
-    let opts = {};
-    opts.jwtFromRequest = ExtractJwt.fromAuthHeader();
-    opts.secretOrKey = config.secret;
+const config = require('./database');
 
-    passport.use(new JwtStrategy(opts, function (jwt_payload, done) {
-        userModel.findOne({id: jwt_payload.id}, function (err, user) {
-            if (err) {
-                return done(err, false);
-            }
+const strategy = new CustomStrategy(
+    function (request, done) {
+        let token = getToken(request.headers);
+        if (token) {
+            jwt.verify(token, config.secret, function (err, decoded) {
+                (err) ? done(err) : done(err, decoded.username);
+            });
+        }
+    }
+);
 
-            if (user) {
-                done(null, user);
-            } else {
-                done(null, false);
-            }
-        });
-    }));
+getToken = function (headers) {
+    if (headers && headers.authorization) {
+        let parted = headers.authorization.split(' ');
+        if (parted.length === 2) {
+            return parted[1];
+        } else {
+            return null;
+        }
+    } else {
+        return null;
+    }
 };
 
 module.exports = strategy;

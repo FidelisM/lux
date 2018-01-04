@@ -1,6 +1,8 @@
 const defaultState = {
-    message: 'Lux',
-    username: 'User',
+    message: 'spoqn',
+    username: '',
+    rooms: [],
+    room: '',
     drawerOpen: false
 };
 
@@ -20,6 +22,16 @@ export default function greeterReducer(state = defaultState, action) {
             return {
                 ...state,
                 drawerOpen: action.drawerOpen
+            };
+        case 'SET_RM_NAME':
+            return {
+                ...state,
+                room: action.room
+            };
+        case 'SET_RM_LIST':
+            return {
+                ...state,
+                rooms: action.rooms
             };
         default:
             return state;
