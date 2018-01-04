@@ -18,12 +18,18 @@ router.get('/lux/convo', function (request, response) {
             });
         }
         db.collection('users').findOne({username: loggedInUsername}, function (err, creator) {
-            db.collection('conversations').find({creator: creator._id}, {fields: {'_id': 1, 'name': 1}},
+            db.collection('conversations').find({creator: creator._id}, {
+                    fields: {
+                        '_id': 1,
+                        'name': 1,
+                        'updatedAt': 1
+                    }
+                },
                 function (err, convos) {
                     convos.toArray(function (err, convosList) {
                         response.json({
                             success: true,
-                            rooms: convosList || []
+                            rooms: convosList || [],
                         });
                     });
                 });
@@ -60,14 +66,21 @@ router.post('/lux/convo/create', function (request, response) {
                     });
                 }
 
-                db.collection('conversations').find({creator: creator._id}, function (err, convos) {
-                    convos.toArray(function (err, convosList) {
-                        response.json({
-                            success: true,
-                            rooms: convosList
+                db.collection('conversations').find({creator: creator._id}, {
+                        fields: {
+                            '_id': 1,
+                            'name': 1,
+                            'updatedAt': 1
+                        }
+                    },
+                    function (err, convos) {
+                        convos.toArray(function (err, convosList) {
+                            response.json({
+                                success: true,
+                                rooms: convosList
+                            });
                         });
                     });
-                });
             });
         });
 

@@ -9,7 +9,7 @@ import {withRouter} from 'react-router-dom';
 
 import kute from 'kute.js'
 import Fingerprint2 from 'fingerprintjs2'
-import loginStyles from './login.css'
+import './login.css'
 
 class Login extends React.Component {
 

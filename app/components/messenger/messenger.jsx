@@ -14,7 +14,7 @@ import SendIcon from 'material-ui/svg-icons/content/send';
 import Subheader from 'material-ui/Subheader';
 import Divider from 'material-ui/Divider';
 
-import messengerStyles from './messenger.css';
+import './messenger.css';
 
 class Messenger extends React.Component {
     constructor(props) {
