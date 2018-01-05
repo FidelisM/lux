@@ -11,6 +11,7 @@ module.exports = {
         alias: {
             Components: path.resolve(__dirname, './app/components'),
             Widgets: path.resolve(__dirname, './app/widgets'),
+            Vendor: path.resolve(__dirname, './app/vendor'),
             Services: path.resolve(__dirname, './app/common/services/service-directory'),
             ServiceManager: path.resolve(__dirname, './app/common/services/service-manager'),
         },

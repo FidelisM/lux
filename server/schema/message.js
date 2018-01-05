@@ -7,7 +7,13 @@ const MessageSchema = new mongoose.Schema({
         trim: true
     },
     author: {
-        type:  mongoose.Schema.Types.ObjectId
+        type: String,
+        required: true,
+        trim: true
+    },
+    timestamp: {
+        type: Number,
+        required: true
     }
 });
 

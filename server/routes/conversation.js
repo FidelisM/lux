@@ -6,7 +6,7 @@ const router = express.Router(),
     convoSchema = require('../schema/conversation'),
     messageSchema = require('../schema/message');
 
-router.get('/lux/convo', function (request, response) {
+router.get('/spoqn/convo', function (request, response) {
     let db = router.getDB(),
         passport = router.getPassport();
 
@@ -37,7 +37,7 @@ router.get('/lux/convo', function (request, response) {
     })(request, response);
 });
 
-router.post('/lux/convo/create', function (request, response) {
+router.post('/spoqn/convo/create', function (request, response) {
     let db = router.getDB(),
         passport = router.getPassport(),
         convoObj = {
@@ -87,7 +87,7 @@ router.post('/lux/convo/create', function (request, response) {
     })(request, response);
 });
 
-router.post('/lux/convo/update', function (request, response) {
+router.post('/spoqn/convo/update', function (request, response) {
     let db = router.getDB(),
         passport = router.getPassport(),
         messageObj = {
@@ -112,7 +112,6 @@ router.post('/lux/convo/update', function (request, response) {
                 });
             }
 
-            debugger
             db.collection('conversations').update({id: request.body.convoID}, {$push: {messages: message}}, function () {
                 db.collection('conversations'.findOne({id: request.body.convoID}, function (err, results) {
                     if (err) {
@@ -132,7 +131,7 @@ router.post('/lux/convo/update', function (request, response) {
     });
 });
 
-router.get('/lux/convo/:id', function (request, response) {
+router.get('/spoqn/convo/:id', function (request, response) {
     let db = router.getDB(),
         passport = router.getPassport();
 

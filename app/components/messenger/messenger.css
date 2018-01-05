@@ -15,6 +15,7 @@
     min-height: 200px;
     overflow: auto;
     margin: 10px 0 auto auto;
+    max-height: 500px;
 }
 
 .messenger-component .messenger-author .user-input.form-control {

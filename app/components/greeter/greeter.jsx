@@ -169,7 +169,7 @@ class Greeter extends React.Component {
 
         ReactDOM.unmountComponentAtNode(container);
         ReactDOM.render(<Provider store={this.context.store}><MuiThemeProvider><Messenger
-            roomName={response.rooms[0].name}/></MuiThemeProvider>
+            roomName={response.rooms[0].name} roomID={response.rooms[0]._id}/></MuiThemeProvider>
         </Provider>, container);
 
     }

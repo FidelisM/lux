@@ -1,3 +1,5 @@
+/*global require*/
+
 const express = require('express'),
     userSchema = require('../schema/user'),
     config = require('../dbconfig/database'),
@@ -5,7 +7,7 @@ const express = require('express'),
 
 const router = express.Router();
 
-router.get('/lux/users', function (request, response) {
+router.get('/spoqn/users', function (request, response) {
     let db = router.getDB(),
         token = getToken(request.headers);
 
@@ -30,7 +32,7 @@ router.get('/lux/users', function (request, response) {
     }
 });
 
-router.get('/lux/refresh', function (request, response) {
+router.get('/spoqn/refresh', function (request, response) {
     let token = getToken(request.headers),
         browser = request.headers.browser,
         db = router.getDB();
@@ -88,7 +90,7 @@ router.get('/lux/refresh', function (request, response) {
     }
 });
 
-router.post('/lux/register', function (request, response) {
+router.post('/spoqn/register', function (request, response) {
     if (request.body.email && request.body.username && request.body.password && request.body.browser) {
         let userData = {
                 email: request.body.email,
@@ -126,7 +128,7 @@ router.post('/lux/register', function (request, response) {
     }
 });
 
-router.post('/lux/login', function (request, response) {
+router.post('/spoqn/login', function (request, response) {
     if (request.body.username && request.body.password && request.body.browser) {
         let db = router.getDB();
 

@@ -1,7 +1,7 @@
 import React from 'react';
 import moment from 'moment';
 
-import messageStyles from './message.css';
+import './message.css';
 
 export default class Message extends React.Component {
     constructor(props) {
@@ -19,8 +19,8 @@ export default class Message extends React.Component {
                                     <div className="chat-body inline-block">
                                         <div className="header">
                                             <div>
-                                                <small>{moment.unix(message.timestamp.seconds).format('MMMM Do YYYY, h:mm:ss a')}</small>
-                                                <strong className="pull-right">{message.displayName}</strong>
+                                                <small>{moment.unix(message.timestamp).format('MMMM Do YYYY, h:mm:ss a')}</small>
+                                                <strong className="pull-right">{message.author}</strong>
                                             </div>
                                         </div>
                                         <p className="message-content">{message.text}</p>
@@ -45,9 +45,9 @@ export default class Message extends React.Component {
                                     <div className="chat-body inline-block">
                                         <div className="header">
                                             <div>
-                                                <strong>{message.displayName}</strong>
+                                                <strong>{message.author}</strong>
                                                 <small
-                                                    className="pull-right">{moment.unix(message.timestamp.seconds).format('MMMM Do YYYY, h:mm:ss a')}</small>
+                                                    className="pull-right">{moment.unix(message.timestamp).format('MMMM Do YYYY, h:mm:ss a')}</small>
                                             </div>
                                         </div>
                                         <p className="message-content">{message.text}</p>

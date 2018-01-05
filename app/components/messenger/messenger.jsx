@@ -2,6 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
 
+import io from 'socket.io-client'
+
 import RaisedButton from 'material-ui/RaisedButton';
 import TextField from 'material-ui/TextField';
 
@@ -15,6 +17,8 @@ import Subheader from 'material-ui/Subheader';
 import Divider from 'material-ui/Divider';
 
 import './messenger.css';
+
+let socket;
 
 class Messenger extends React.Component {
     constructor(props) {
@@ -43,21 +47,52 @@ class Messenger extends React.Component {
 
     _getMessages() {
         let self = this,
-            state = this.context.store.getState();
+            token = localStorage.getItem('token'),
+            options = {
+                headers: {
+                    Authorization: token
+                },
+                url: services.chat.url.replace(':id', this.props.roomID)
+            };
 
-        self.props.dispatch({
+        serviceManager.get(options).then(function (response) {
+            (response.success) ? self._handleMessagesLoadSuccess(response) : self._handleMessagesLoadFailure(response);
+        }).catch(self._handleMessagesLoadFailure.bind(self));
+    }
+
+    _handleMessagesLoadSuccess(response) {
+        let token = localStorage.getItem('token');
+
+        this.props.dispatch({
             type: 'UPDATE_MESSAGE_LIST',
-            messages: []
+            messages: response.messages
         });
+
+        socket = io('/spoqn/messenger/' + this.props.roomID, {
+            query: 'token=' + token
+        });
+
+        this.forceUpdate();
+    }
+
+    _handleMessagesLoadFailure() {
+
     }
 
     sendMessage() {
         let self = this,
-            state = this.context.store.getState();
+            state = this.context.store.getState().messengerReducer;
 
-        self.props.dispatch({
-            type: 'UPDATE_MESSAGE_LIST',
-            messages: []
+        socket.emit('message', {
+            message: state.newMessage,
+            room: this.props.roomID
+        }, function (response) {
+            self.props.dispatch({
+                type: 'UPDATE_MESSAGE_LIST',
+                messages: response.messages
+            });
+
+            self.forceUpdate();
         });
     }
 

@@ -1,4 +1,7 @@
+/*global require*/
+
 const express = require('express'),
+    socket = require('socket.io'),
     bodyParser = require('body-parser'),
     mongoose = require('mongoose'),
     passport = require('passport'),
@@ -6,17 +9,19 @@ const express = require('express'),
 
     strategy = require('./server/dbconfig/strategy'),
     config = require('./server/dbconfig/database'),
-    authRouter = require('./server/routes/auth'),
-    convoRouter = require('./server/routes/convo');
+    authenticationRouter = require('./server/routes/authentication'),
+    conversationRouter = require('./server/routes/conversation'),
+    messengerRouter = require('./server/routes/messenger');
 
 const app = express(),
     router = express.Router(),
-    customRouters = [authRouter, convoRouter],
+    customRouters = [authenticationRouter, conversationRouter, messengerRouter],
     port = process.env.PORT || 3000;
+
+var io;
 
 router.use(express.static('dist'));
 passport.use('custom-jwt', strategy);
-
 
 mongoose.connect(config.database, {useMongoClient: true}).then(function () {
     app.use(morgan('dev'));
@@ -27,13 +32,14 @@ mongoose.connect(config.database, {useMongoClient: true}).then(function () {
     app.use(bodyParser.json());
     app.use(passport.initialize());
 
-    app.use(authRouter);
-    app.use(convoRouter);
+    app.use(authenticationRouter);
+    app.use(conversationRouter);
+    app.use(messengerRouter);
     app.use(router);
 
-    app.listen(port, function () {
+    io = socket.listen(app.listen(port, function () {
         console.log('Server is running on port: ' + port);
-    });
+    }));
 }, function (err) {
     console.log(err);
 });
@@ -47,5 +53,9 @@ for (let index = 0; index < customRouters.length; index++) {
 
     customRouters[index].getPassport = function () {
         return passport;
+    };
+
+    customRouters[index].getSocketIO = function () {
+        return io;
     };
 }

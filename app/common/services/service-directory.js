@@ -1,17 +1,20 @@
 export default {
     login: {
-        url: '/lux/login'
+        url: '/spoqn/login'
     },
 
     register: {
-        url: '/lux/register'
+        url: '/spoqn/register'
     },
 
     refresh: {
-        url: '/lux/refresh'
+        url: '/spoqn/refresh'
     },
     room: {
-        create: '/lux/convo/create',
-        allRooms: '/lux/convo'
+        create: '/spoqn/convo/create',
+        allRooms: '/spoqn/convo'
+    },
+    chat: {
+        url: '/spoqn/messenger/open/:id'
     }
 }
