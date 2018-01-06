@@ -201,9 +201,9 @@ class Greeter extends React.Component {
         return (
             <div className='greeter-component'>
                 <div className='app-bar'>
-                    <AppBar title={this.context.store.getState().greeterReducer.message} style={{height: '65px'}}
+                    <AppBar title={this.context.store.getState().greeterReducer.title} style={{height: '65px'}}
                             iconElementRight={
-                                <Logged label={this.context.store.getState().greeterReducer.username}
+                                <Logged label={this.context.store.getState().authReducer.username}
                                         data-refresh={this.handleRefresh.bind(this)}
                                         data-logout={this.handleLogOut.bind(this)}
                                         data-help={this.handleHelp.bind(this)}
