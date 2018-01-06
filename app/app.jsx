@@ -1,5 +1,4 @@
 import React from 'react';
-import _ from 'lodash'
 import ReactDOM from 'react-dom';
 import {HashRouter, Route, Switch, Redirect} from 'react-router-dom'
 
@@ -75,7 +74,7 @@ const authenticateUser = function () {
                 });
 
                 store.dispatch({
-                    type: 'SET_USER',
+                    type: 'SET_USERNAME',
                     username: response.username
                 });
             }

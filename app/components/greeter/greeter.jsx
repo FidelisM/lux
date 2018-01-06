@@ -27,7 +27,7 @@ import Subheader from 'material-ui/Subheader';
 import IconButton from 'material-ui/IconButton';
 
 import PersonIcon from 'material-ui/svg-icons/social/person';
-import PplOutlineIcon from 'material-ui/svg-icons/social/people-outline';
+import GroupAddIcon from 'material-ui/svg-icons/social/group-add';
 import AddIcon from 'material-ui/svg-icons/content/add';
 import PencilIcon from 'material-ui/svg-icons/content/create';
 import BlockIcon from 'material-ui/svg-icons/content/block';
@@ -147,11 +147,7 @@ class Greeter extends React.Component {
     }
 
     _handleCreateSuccess(response) {
-        this.props.dispatch({
-            type: 'SET_RM_LIST',
-            rooms: response.rooms
-        });
-
+        this._handleFetchSuccess(response);
         this.forceUpdate();
     }
 
@@ -171,7 +167,6 @@ class Greeter extends React.Component {
         ReactDOM.render(<Provider store={this.context.store}><MuiThemeProvider><Messenger
             roomName={response.rooms[0].name} roomID={response.rooms[0]._id}/></MuiThemeProvider>
         </Provider>, container);
-
     }
 
     _handleFetchFailure(response) {
@@ -183,7 +178,7 @@ class Greeter extends React.Component {
 
         ReactDOM.unmountComponentAtNode(container);
         ReactDOM.render(<Provider store={this.context.store}><MuiThemeProvider><Messenger
-            roomName={room.name}/></MuiThemeProvider>
+            roomName={room.name} roomID={room._id}/></MuiThemeProvider>
         </Provider>, container);
     }
 
@@ -263,7 +258,7 @@ const ConversationMenu = (props) => (
               anchorOrigin={{horizontal: 'left', vertical: 'bottom'}}>
         <MenuItem onClick={props['data-rename']} primaryText='Rename Room' rightIcon={<PencilIcon/>}/>
         <MenuItem onClick={props['data-delete']} primaryText='Delete Room' rightIcon={<DeleteIcon/>}/>
-        <MenuItem onClick={props['data-editUsers']} primaryText='Edit Members' rightIcon={<PplOutlineIcon/>}/>
+        <MenuItem onClick={props['data-editUsers']} primaryText='Edit Members' rightIcon={<GroupAddIcon/>}/>
     </IconMenu>
 );
 

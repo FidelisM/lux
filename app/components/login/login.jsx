@@ -103,7 +103,7 @@ class Login extends React.Component {
         });
 
         self.props.dispatch({
-            type: 'SET_USER',
+            type: 'SET_USERNAME',
             username: response.username
         });
 

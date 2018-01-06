@@ -2,7 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
 
-import io from 'socket.io-client'
+import io from 'socket.io-client';
+import _ from 'lodash';
 
 import RaisedButton from 'material-ui/RaisedButton';
 import TextField from 'material-ui/TextField';
@@ -18,7 +19,8 @@ import Divider from 'material-ui/Divider';
 
 import './messenger.css';
 
-let socket;
+let socket,
+    openSockets = [];
 
 class Messenger extends React.Component {
     constructor(props) {
@@ -26,15 +28,18 @@ class Messenger extends React.Component {
 
         this.styles = {
             button: {
-                color: '#FFFFFF',
-                marginLeft: 20
+                color: '#FFFFFF'
             },
-            input: {}
+            input: {
+                width: '85%'
+            }
         };
     }
 
     componentDidMount() {
-        this._getMessages();
+        if (this.props.roomID) {
+            this._getMessages();
+        }
     }
 
     componentDidUpdate() {
@@ -61,16 +66,28 @@ class Messenger extends React.Component {
     }
 
     _handleMessagesLoadSuccess(response) {
-        let token = localStorage.getItem('token');
+        let token = localStorage.getItem('token'),
+            socketURL = '/spoqn/messenger/' + this.props.roomID,
+            socketIndex;
 
         this.props.dispatch({
             type: 'UPDATE_MESSAGE_LIST',
             messages: response.messages
         });
 
-        socket = io('/spoqn/messenger/' + this.props.roomID, {
-            query: 'token=' + token
+        socketIndex = _.findIndex(openSockets, function (socket) {
+            return socket.nsp === socketURL;
         });
+
+        if (socketIndex === -1) {
+            socket = io(socketURL, {
+                query: 'token=' + token
+            });
+
+            openSockets.push(socket);
+        } else {
+            socket = openSockets[socketIndex];
+        }
 
         this.forceUpdate();
     }
@@ -90,6 +107,11 @@ class Messenger extends React.Component {
             self.props.dispatch({
                 type: 'UPDATE_MESSAGE_LIST',
                 messages: response.messages
+            });
+
+            self.props.dispatch({
+                type: 'ADD_NEW_MESSAGE',
+                newMessage: ''
             });
 
             self.forceUpdate();
@@ -112,7 +134,7 @@ class Messenger extends React.Component {
                     </div>
                     <Divider/>
                     <div className="messenger-view" id="messenger-view">
-                        <Message messages={this.context.store.getState().messengerReducer.messages}/>
+                        <Message messages={this.context.store.getState().messengerReducer.messages} username={this.context.store.getState().authReducer.username}/>
                     </div>
                     <div className={"messenger-author"}>
                         <div className="message-author-content">
