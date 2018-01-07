@@ -11,11 +11,12 @@ const express = require('express'),
     config = require('./server/dbconfig/database'),
     authenticationRouter = require('./server/routes/authentication'),
     conversationRouter = require('./server/routes/conversation'),
-    messengerRouter = require('./server/routes/messenger');
+    messengerRouter = require('./server/routes/messenger'),
+    friendsRouter = require('./server/routes/friends');
 
 const app = express(),
     router = express.Router(),
-    customRouters = [authenticationRouter, conversationRouter, messengerRouter],
+    customRouters = [authenticationRouter, conversationRouter, messengerRouter, friendsRouter],
     port = process.env.PORT || 3000;
 
 var io;
@@ -35,6 +36,7 @@ mongoose.connect(config.database, {useMongoClient: true}).then(function () {
     app.use(authenticationRouter);
     app.use(conversationRouter);
     app.use(messengerRouter);
+    app.use(friendsRouter);
     app.use(router);
 
     io = socket.listen(app.listen(port, function () {

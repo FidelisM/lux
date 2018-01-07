@@ -1,9 +1,7 @@
 import React from 'react';
+import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import Dialog from 'material-ui/Dialog';
 import FlatButton from 'material-ui/FlatButton';
-import PropTypes from "prop-types";
-import {connect} from "react-redux";
-import {push} from "react-router-redux";
 
 class AlertDialog extends React.Component {
     constructor(props) {
@@ -11,21 +9,23 @@ class AlertDialog extends React.Component {
     }
 
     handleClose() {
-        this.context.store.dispatch(push('/login'));
+        if (this.props.closeCB) {
+            this.props.closeCB();
+        }
     }
 
     render() {
         return (
-            <div>
-                <Dialog contentStyle={{width: this.props.width}} actions={<FlatButton label="Login" onClick={this.handleClose.bind(this)}/>}
-                        primary={true} open={true} onClick={this.handleClose.bind(this)}>{this.props.message}</Dialog>
-            </div>
+            <MuiThemeProvider>
+                <div className="alert-overlay">
+                    <Dialog contentStyle={{width: this.props.width}} style={this.props.style}
+                            actions={<FlatButton label={this.props.label} onClick={this.handleClose.bind(this)}/>}
+                            primary={true} open={true}
+                            onClick={this.handleClose.bind(this)}>{this.props.content}</Dialog>
+                </div>
+            </MuiThemeProvider>
         );
     }
 }
 
-AlertDialog.contextTypes = {
-    store: PropTypes.object
-};
-
-export default connect()(AlertDialog);
+export default AlertDialog;

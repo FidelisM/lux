@@ -39,7 +39,7 @@ router.get('/spoqn/messenger/open/:id', function (request, response) {
             });
 
             namespace.on('connection', function (socket) {
-                socket.on('message', function (data, acknowledgement) {
+                socket.on('message', function (data) {
                     let user = socket.decoded,
                         messageObj = {
                             author: user.username,
@@ -50,27 +50,8 @@ router.get('/spoqn/messenger/open/:id', function (request, response) {
                     data.message = new messageSchema(messageObj);
 
                     saveMessage(db, data, function () {
-                        getMessages(db, data, function (err, convosList) {
-                            acknowledgement({
-                                success: true,
-                                messages: (convosList[0] && convosList[0].messages) || []
-                            });
-                        })
+                        namespace.emit('new-message');
                     });
-                });
-            });
-
-            getMessages(db, {room: request.params.id}, function (err, convosList) {
-                response.json({
-                    success: true,
-                    messages: (convosList[0] && convosList[0].messages) || []
-                });
-            });
-        } else {
-            getMessages(db, {room: request.params.id}, function (err, convosList) {
-                response.json({
-                    success: true,
-                    messages: (convosList[0] && convosList[0].messages) || []
                 });
             });
         }

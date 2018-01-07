@@ -31,7 +31,7 @@ export default class Message extends React.Component {
                                         <strong
                                             className={(self.props.username === message.author) ? "message-author right" : "message-author"}>{message.author}</strong>
                                         <small
-                                            className={(self.props.username === message.author) ? "message-timestamp" : "message-timestamp"}>
+                                            className={(self.props.username === message.author) ? "message-timestamp" : "message-timestamp right"}>
                                             {moment(new Date(message.timestamp)).format('MMM Do YYYY, h:mm a')}
                                         </small>
                                     </div>

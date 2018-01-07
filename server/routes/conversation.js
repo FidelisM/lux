@@ -1,10 +1,10 @@
 /*global require*/
 
-const express = require('express');
+const express = require('express'),
+    mongoose = require('mongoose');
 
 const router = express.Router(),
-    convoSchema = require('../schema/conversation'),
-    messageSchema = require('../schema/message');
+    convoSchema = require('../schema/conversation');
 
 router.get('/spoqn/convo', function (request, response) {
     let db = router.getDB(),
@@ -18,7 +18,11 @@ router.get('/spoqn/convo', function (request, response) {
             });
         }
         db.collection('users').findOne({username: loggedInUsername}, function (err, creator) {
-            db.collection('conversations').find({creator: creator._id}, {
+            let ObjectId = mongoose.Types.ObjectId,
+                id = new ObjectId(creator._id);
+
+            //$or: [{creator: id}, {members: creator.email}]
+            db.collection('conversations').find({members: {$eq: creator.email}}, {
                     fields: {
                         '_id': 1,
                         'name': 1,
@@ -55,6 +59,7 @@ router.post('/spoqn/convo/create', function (request, response) {
         db.collection('users').findOne({username: loggedInUsername}, function (err, creator) {
             convoObj.creator = creator._id;
             convoObj.name = request.body.name;
+            convoObj.members = [creator.email];
 
             let convo = new convoSchema(convoObj);
 
@@ -87,14 +92,9 @@ router.post('/spoqn/convo/create', function (request, response) {
     })(request, response);
 });
 
-router.post('/spoqn/convo/update', function (request, response) {
+router.post('/spoqn/convo/member/add', function (request, response) {
     let db = router.getDB(),
-        passport = router.getPassport(),
-        messageObj = {
-            author: request.body.userID,
-            text: request.body.text
-        },
-        message = new messageSchema(messageObj);
+        passport = router.getPassport();
 
     passport.authenticate('custom-jwt', function (err) {
         if (err) {
@@ -104,31 +104,24 @@ router.post('/spoqn/convo/update', function (request, response) {
             });
         }
 
-        db.collection('conversations'.findOne({id: request.body.convoID}, function (err, results) {
+        let ObjectId = mongoose.Types.ObjectId,
+            id = new ObjectId(request.body.roomID);
+
+        db.collection('conversations').findOneAndUpdate({_id: id}, {$push: {members: request.body.member.email}}, function (err) {
             if (err) {
-                return response.send({
-                    success: false,
-                    err: err
+                return response.json({
+                    success: true,
+                    msg: 'Could Not Add Member To Conversation. ' + err
                 });
             }
 
-            db.collection('conversations').update({id: request.body.convoID}, {$push: {messages: message}}, function () {
-                db.collection('conversations'.findOne({id: request.body.convoID}, function (err, results) {
-                    if (err) {
-                        return response.send({
-                            success: false,
-                            err: err
-                        });
-                    }
-
-                    return response.send({
-                        success: true,
-                        messages: results
-                    });
-                }));
+            return response.json({
+                success: true,
+                msg: 'Member Added.'
             });
-        }));
-    });
+        })
+
+    })(request, response);
 });
 
 router.get('/spoqn/convo/:id', function (request, response) {
@@ -143,13 +136,22 @@ router.get('/spoqn/convo/:id', function (request, response) {
             });
         }
 
-        db.collection('conversations'.findOne({username: request.query.id}, function (err, results) {
+        getMessages(db, {room: request.params.id}, function (err, convosList) {
             response.json({
                 success: true,
-                data: results
+                messages: (convosList[0] && convosList[0].messages) || []
             });
-        }));
-    });
+        });
+    })(request, response);
 });
+
+getMessages = function (db, data, callback) {
+    let ObjectId = mongoose.Types.ObjectId,
+        id = new ObjectId(data.room);
+
+    db.collection('conversations').find({_id: id}, function (err, convos) {
+        convos.toArray(callback);
+    });
+};
 
 module.exports = router;

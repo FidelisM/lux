@@ -2,6 +2,8 @@ const defaultState = {
     title: 'spoqn',
     rooms: [],
     room: '',
+    friend: '',
+    friends: [],
     drawerOpen: false
 };
 
@@ -21,6 +23,16 @@ export default function greeterReducer(state = defaultState, action) {
             return {
                 ...state,
                 rooms: action.rooms
+            };
+        case 'ADD_FRIEND':
+            return {
+                ...state,
+                friend: action.friend
+            };
+        case 'SET_FRIENDS_LIST':
+            return {
+                ...state,
+                friends: action.friends
             };
         default:
             return state;

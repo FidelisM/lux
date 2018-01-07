@@ -8,7 +8,6 @@
     "postinstall": "webpack"
   },
   "author": "Fidelis Msacky",
-  "license": "MIT",
   "dependencies": {
     "babel-core": "^6.24.1",
     "babel-loader": "^6.4.1",
@@ -39,6 +38,7 @@
     "prop-types": "^15.6.0",
     "react": "^15.5.3",
     "react-dom": "^15.5.3",
+    "react-draggable": "^3.0.4",
     "react-redux": "^5.0.6",
     "react-router-dom": "^4.2.2",
     "react-router-redux": "^5.0.0-alpha.9",

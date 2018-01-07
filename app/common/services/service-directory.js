@@ -12,9 +12,15 @@ export default {
     },
     room: {
         create: '/spoqn/convo/create',
-        allRooms: '/spoqn/convo'
+        allRooms: '/spoqn/convo',
+        addMember: '/spoqn/convo/member/add'
     },
     chat: {
-        url: '/spoqn/messenger/open/:id'
+        openConnection: '/spoqn/messenger/open/:id',
+        getMessages: '/spoqn/convo/:id'
+    },
+    friend: {
+        add: '/spoqn/friends/add',
+        getAll: '/spoqn/friends'
     }
 }

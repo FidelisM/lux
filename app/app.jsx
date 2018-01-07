@@ -10,7 +10,7 @@ import Greeter from 'Components/greeter/greeter';
 import reducers from './reducers/rootReducer';
 
 import {createStore, applyMiddleware} from 'redux'
-import {ConnectedRouter, routerReducer, routerMiddleware} from 'react-router-redux'
+import {ConnectedRouter, routerReducer, routerMiddleware, push} from 'react-router-redux'
 import {Provider} from 'react-redux';
 import createHashHistory from 'history/createHashHistory'
 
@@ -36,7 +36,9 @@ const App = function (appProps) {
                             <Route path='/login' component={Login}/>
                             <Route path='/home' render={(props) => (
                                 isAuthentic() ? <Greeter {...props} /> :
-                                    <AlertDialog width={500} message={appProps.error}/>
+                                    <AlertDialog width={500} content={appProps.error} closeCB={() => {
+                                        store.dispatch(push('/login'))
+                                    }} label="Login"/>
                             )}/>
                         </Switch>
                     </HashRouter>

@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
+import Draggable from 'react-draggable';
 
 import io from 'socket.io-client';
 import _ from 'lodash';
@@ -38,7 +39,7 @@ class Messenger extends React.Component {
 
     componentDidMount() {
         if (this.props.roomID) {
-            this._getMessages();
+            this._getMessages().then(this._initializeSocket.bind(this));
         }
     }
 
@@ -57,23 +58,43 @@ class Messenger extends React.Component {
                 headers: {
                     Authorization: token
                 },
-                url: services.chat.url.replace(':id', this.props.roomID)
-            };
+                url: services.chat.getMessages.replace(':id', this.props.roomID)
+            },
+            promise = serviceManager.get(options);
 
-        serviceManager.get(options).then(function (response) {
-            (response.success) ? self._handleMessagesLoadSuccess(response) : self._handleMessagesLoadFailure(response);
+        promise.then(function (response) {
+            if (response.success) {
+                self._handleMessagesLoadSuccess(response);
+            } else {
+                self._handleMessagesLoadFailure(response);
+            }
         }).catch(self._handleMessagesLoadFailure.bind(self));
+
+        return promise;
     }
 
     _handleMessagesLoadSuccess(response) {
-        let token = localStorage.getItem('token'),
-            socketURL = '/spoqn/messenger/' + this.props.roomID,
-            socketIndex;
-
         this.props.dispatch({
             type: 'UPDATE_MESSAGE_LIST',
             messages: response.messages
         });
+
+        this.forceUpdate();
+
+        document.querySelectorAll('.chat-content:last-of-type')[0].scrollIntoView();
+    }
+
+    _initializeSocket() {
+        let self = this,
+            token = localStorage.getItem('token'),
+            socketURL = '/spoqn/messenger/' + this.props.roomID,
+            socketIndex,
+            options = {
+                headers: {
+                    Authorization: token
+                },
+                url: services.chat.openConnection.replace(':id', this.props.roomID)
+            };
 
         socketIndex = _.findIndex(openSockets, function (socket) {
             return socket.nsp === socketURL;
@@ -84,12 +105,16 @@ class Messenger extends React.Component {
                 query: 'token=' + token
             });
 
+            socket.on('new-message', function () {
+                self._getMessages();
+            });
+
             openSockets.push(socket);
         } else {
             socket = openSockets[socketIndex];
         }
 
-        this.forceUpdate();
+        serviceManager.get(options);
     }
 
     _handleMessagesLoadFailure() {
@@ -97,24 +122,11 @@ class Messenger extends React.Component {
     }
 
     sendMessage() {
-        let self = this,
-            state = this.context.store.getState().messengerReducer;
+        let state = this.context.store.getState().messengerReducer;
 
         socket.emit('message', {
             message: state.newMessage,
             room: this.props.roomID
-        }, function (response) {
-            self.props.dispatch({
-                type: 'UPDATE_MESSAGE_LIST',
-                messages: response.messages
-            });
-
-            self.props.dispatch({
-                type: 'ADD_NEW_MESSAGE',
-                newMessage: ''
-            });
-
-            self.forceUpdate();
         });
     }
 
@@ -127,28 +139,33 @@ class Messenger extends React.Component {
 
     render() {
         return (
-            <div className={"messenger-component"}>
-                <div className="content">
-                    <div className="header">
-                        <Subheader>Room: {this.props.roomName}</Subheader>
-                    </div>
-                    <Divider/>
-                    <div className="messenger-view" id="messenger-view">
-                        <Message messages={this.context.store.getState().messengerReducer.messages} username={this.context.store.getState().authReducer.username}/>
-                    </div>
-                    <div className={"messenger-author"}>
-                        <div className="message-author-content">
-                            <TextField floatingLabelText="Get Involved" type="text"
-                                       className="user-input inline-block" id="user-input"
-                                       multiLine={true} rows={3} rowsMax={6} style={this.styles.input}
-                                       onChange={this.handleNewMessage.bind(this)}/>
-                            <RaisedButton backgroundColor="#A4C639" icon={<SendIcon color={fullWhite}/>} primary={true}
-                                          style={this.styles.button} onClick={this.sendMessage.bind(this)} label="Send"
-                                          labelPosition="before"/>
+            <Draggable handle=".messenger-component .header">
+                <div className={"messenger-component"}>
+                    <div className="content">
+                        <div className="header">
+                            <Subheader>Room: {this.props.roomName}</Subheader>
+                        </div>
+                        <Divider/>
+                        <div className="messenger-view" id="messenger-view">
+                            <Message messages={this.context.store.getState().messengerReducer.messages}
+                                     username={this.context.store.getState().authReducer.username}/>
+                        </div>
+                        <div className={"messenger-author"}>
+                            <div className="message-author-content">
+                                <TextField floatingLabelText="Get Involved" type="text"
+                                           className="user-input inline-block" id="user-input"
+                                           multiLine={true} rows={3} rowsMax={6} style={this.styles.input}
+                                           onChange={this.handleNewMessage.bind(this)}/>
+                                <RaisedButton backgroundColor="#A4C639" icon={<SendIcon color={fullWhite}/>}
+                                              primary={true}
+                                              style={this.styles.button} onClick={this.sendMessage.bind(this)}
+                                              label="Send"
+                                              labelPosition="before"/>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </Draggable>
         );
     }
 }

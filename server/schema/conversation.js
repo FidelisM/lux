@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 
 const ConversationSchema = new mongoose.Schema({
     messages: {
-        type: Array
+        type: [String]
     },
     creator: {
         type: mongoose.Schema.Types.ObjectId,
@@ -13,6 +13,9 @@ const ConversationSchema = new mongoose.Schema({
         type: String,
         required: true,
         trim: true
+    },
+    members: {
+        type: [String]
     }
 }, {timestamps: true});
 
