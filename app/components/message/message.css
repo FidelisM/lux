@@ -7,18 +7,17 @@
 }
 
 .message-list .chat-head {
-    vertical-align: top;
-    display: inline-block;
+
 }
 
 .message-list .chat-body {
     margin: 0 10px;
-    display: inline-block;
-    width: 90%;
 }
 
 .message-list .chat-content {
     padding: 10px;
+    display: grid;
+    grid-template-columns: 45px 1fr;
 }
 
 .message-list .chat-content .message-content {

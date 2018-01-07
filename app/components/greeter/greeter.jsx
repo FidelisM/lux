@@ -6,6 +6,7 @@ import {withRouter} from 'react-router-dom'
 import PropTypes from 'prop-types';
 import {Provider} from 'react-redux';
 import moment from 'moment';
+import io from 'socket.io-client';
 
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 
@@ -71,10 +72,21 @@ const convoIconMenuStyles = {
 class Greeter extends React.Component {
     constructor(props) {
         super(props);
+
+        this._initializeSocket();
     }
 
     componentDidMount() {
         this._getRooms();
+    }
+
+    _initializeSocket() {
+        let token = localStorage.getItem('token'),
+            socketURL = '/spoqn/messenger/chat';
+
+        this.socket = io(socketURL, {
+            query: 'token=' + token
+        });
     }
 
     toggleDrawer() {
@@ -166,7 +178,7 @@ class Greeter extends React.Component {
 
         ReactDOM.unmountComponentAtNode(container);
         ReactDOM.render(<Provider store={this.context.store}><MuiThemeProvider><Messenger
-            roomName={room.name} roomID={room._id}/></MuiThemeProvider>
+            roomName={room.name} roomID={room._id} socket={this.socket}/></MuiThemeProvider>
         </Provider>, container);
     }
 
@@ -196,7 +208,7 @@ class Greeter extends React.Component {
         if (response.rooms.length) {
             ReactDOM.unmountComponentAtNode(container);
             ReactDOM.render(<Provider store={this.context.store}><MuiThemeProvider><Messenger
-                roomName={response.rooms[0].name} roomID={response.rooms[0]._id}/></MuiThemeProvider>
+                roomName={response.rooms[0].name} roomID={response.rooms[0]._id} socket={this.socket}/></MuiThemeProvider>
             </Provider>, container);
         }
     }

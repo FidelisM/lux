@@ -3,9 +3,6 @@ import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
 import Draggable from 'react-draggable';
 
-import io from 'socket.io-client';
-import _ from 'lodash';
-
 import RaisedButton from 'material-ui/RaisedButton';
 import TextField from 'material-ui/TextField';
 
@@ -19,9 +16,6 @@ import Subheader from 'material-ui/Subheader';
 import Divider from 'material-ui/Divider';
 
 import './messenger.css';
-
-let socket,
-    openSockets = [];
 
 class Messenger extends React.Component {
     constructor(props) {
@@ -41,6 +35,10 @@ class Messenger extends React.Component {
         if (this.props.roomID) {
             this._getMessages().then(this._initializeSocket.bind(this));
         }
+    }
+
+    componentWillUnmount() {
+        this.props.socket.emit('leave', this.props.roomID);
     }
 
     componentDidUpdate() {
@@ -63,7 +61,7 @@ class Messenger extends React.Component {
                 headers: {
                     Authorization: token
                 },
-                url: services.chat.getMessages.replace(':id', this.props.roomID)
+                url: services.room.getMessages.replace(':id', this.props.roomID)
             },
             promise = serviceManager.get(options);
 
@@ -86,36 +84,13 @@ class Messenger extends React.Component {
     }
 
     _initializeSocket() {
-        let self = this,
-            token = localStorage.getItem('token'),
-            socketURL = '/spoqn/messenger/' + this.props.roomID,
-            socketIndex,
-            options = {
-                headers: {
-                    Authorization: token
-                },
-                url: services.chat.openConnection.replace(':id', this.props.roomID)
-            };
+        let self = this;
 
-        socketIndex = _.findIndex(openSockets, function (socket) {
-            return socket.nsp === socketURL;
+        this.props.socket.emit('room', self.props.roomID);
+
+        this.props.socket.on('new-message', function () {
+            self._getMessages();
         });
-
-        if (socketIndex === -1) {
-            socket = io(socketURL, {
-                query: 'token=' + token
-            });
-
-            socket.on('new-message', function () {
-                self._getMessages();
-            });
-
-            openSockets.push(socket);
-        } else {
-            socket = openSockets[socketIndex];
-        }
-
-        serviceManager.get(options);
     }
 
     _handleMessagesLoadFailure() {
@@ -125,7 +100,7 @@ class Messenger extends React.Component {
     sendMessage() {
         let state = this.context.store.getState().messengerReducer;
 
-        socket.emit('message', {
+        this.props.socket.emit('message', {
             message: state.newMessage,
             room: this.props.roomID
         });
