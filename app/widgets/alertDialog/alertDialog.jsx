@@ -2,6 +2,7 @@ import React from 'react';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import Dialog from 'material-ui/Dialog';
 import FlatButton from 'material-ui/FlatButton';
+import ReactDOM from "react-dom";
 
 class AlertDialog extends React.Component {
     constructor(props) {
@@ -12,6 +13,8 @@ class AlertDialog extends React.Component {
         if (this.props.closeCB) {
             this.props.closeCB();
         }
+
+        ReactDOM.unmountComponentAtNode(document.getElementById('overlay'));
     }
 
     render() {

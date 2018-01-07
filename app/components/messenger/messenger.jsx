@@ -45,10 +45,15 @@ class Messenger extends React.Component {
 
     componentDidUpdate() {
         document.querySelector('.messenger-author .user-input').value = '';
+        this.focusLatestMessage();
     }
 
     focusLatestMessage() {
-        let element;
+        let element = document.querySelectorAll('.chat-content:last-of-type')[0];
+
+        if (element) {
+            element.scrollIntoView();
+        }
     }
 
     _getMessages() {
@@ -78,10 +83,6 @@ class Messenger extends React.Component {
             type: 'UPDATE_MESSAGE_LIST',
             messages: response.messages
         });
-
-        this.forceUpdate();
-
-        document.querySelectorAll('.chat-content:last-of-type')[0].scrollIntoView();
     }
 
     _initializeSocket() {
@@ -147,7 +148,7 @@ class Messenger extends React.Component {
                         </div>
                         <Divider/>
                         <div className="messenger-view" id="messenger-view">
-                            <Message messages={this.context.store.getState().messengerReducer.messages}
+                            <Message messages={this.props.messages}
                                      username={this.context.store.getState().authReducer.username}/>
                         </div>
                         <div className={"messenger-author"}>
@@ -172,7 +173,7 @@ class Messenger extends React.Component {
 
 Messenger.propTypes = {
     newMessage: PropTypes.string,
-    messages: PropTypes.object
+    messages: PropTypes.arrayOf(PropTypes.object)
 };
 
 Messenger.contextTypes = {
@@ -181,8 +182,8 @@ Messenger.contextTypes = {
 
 function mapStateToProps(state) {
     return {
-        newMessage: state.newMessage,
-        messages: state.messages
+        newMessage: state.messengerReducer.newMessage,
+        messages: state.messengerReducer.messages
     };
 }
 

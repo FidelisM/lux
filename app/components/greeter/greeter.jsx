@@ -84,8 +84,6 @@ class Greeter extends React.Component {
             type: 'SET_DRAWER',
             drawerOpen: !prevState
         });
-
-        this.forceUpdate();
     }
 
     handleLogOut() {
@@ -95,7 +93,7 @@ class Greeter extends React.Component {
 
         self.props.dispatch({
             type: 'SET_AUTH',
-            auth: {}
+            auth: ''
         });
 
         self.context.store.dispatch(push('/login'));
@@ -157,7 +155,6 @@ class Greeter extends React.Component {
 
     _handleCreateSuccess(response) {
         this._handleFetchSuccess(response);
-        this.forceUpdate();
     }
 
     _handleCreateFailure(response) {
@@ -418,11 +415,12 @@ const ConversationMenu = (props) => (
 );
 
 Greeter.propTypes = {
-    message: PropTypes.string,
-    drawerOpen: PropTypes.bool,
+    title: PropTypes.string,
+    room: PropTypes.string,
     rooms: PropTypes.array,
+    friend: PropTypes.string,
     friends: PropTypes.array,
-    room: PropTypes.string
+    drawerOpen: PropTypes.bool
 };
 
 Greeter.contextTypes = {
@@ -431,11 +429,12 @@ Greeter.contextTypes = {
 
 function mapStateToProps(state) {
     return {
-        message: state.message,
-        drawerOpen: state.drawerOpen,
-        rooms: state.rooms,
-        room: state.room,
-        friends: state.friends
+        title: state.greeterReducer.title,
+        room: state.greeterReducer.room,
+        rooms: state.greeterReducer.rooms,
+        friend: state.greeterReducer.friend,
+        friends: state.greeterReducer.friends,
+        drawerOpen: state.greeterReducer.drawerOpen
     };
 }
 

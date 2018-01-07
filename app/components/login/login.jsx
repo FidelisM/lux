@@ -117,7 +117,7 @@ class Login extends React.Component {
 
         self.props.dispatch({
             type: 'SET_AUTH',
-            auth: {}
+            auth: ''
         });
     }
 
@@ -172,7 +172,7 @@ Login.propTypes = {
     passwordConfirm: PropTypes.string,
     username: PropTypes.string,
     tel: PropTypes.string,
-    auth: PropTypes.object
+    auth: PropTypes.string
 };
 
 Login.contextTypes = {
@@ -181,12 +181,12 @@ Login.contextTypes = {
 
 function mapStateToProps(state) {
     return {
-        email: state.email,
-        password: state.password,
-        passwordConfirm: state.password,
-        username: state.password,
-        tel: state.password,
-        auth: state.auth
+        email: state.authReducer.email,
+        password: state.authReducer.password,
+        passwordConfirm: state.authReducer.password,
+        username: state.authReducer.password,
+        tel: state.authReducer.password,
+        auth: state.authReducer.auth
     };
 }
 

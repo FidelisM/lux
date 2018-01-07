@@ -1,7 +1,7 @@
 const defaultState = {
     title: 'spoqn',
-    rooms: [],
     room: '',
+    rooms: [],
     friend: '',
     friends: [],
     drawerOpen: false

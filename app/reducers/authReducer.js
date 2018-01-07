@@ -4,7 +4,7 @@ const defaultState = {
     passwordConfirm: '',
     username: '',
     tel: '',
-    auth: {}
+    auth: ''
 };
 
 export default function authReducer(state = defaultState, action) {
