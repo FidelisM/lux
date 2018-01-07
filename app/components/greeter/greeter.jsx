@@ -176,6 +176,8 @@ class Greeter extends React.Component {
     openRoom(room) {
         let container = document.getElementsByClassName('messenger')[0];
 
+        this.socket.removeAllListeners();
+
         ReactDOM.unmountComponentAtNode(container);
         ReactDOM.render(<Provider store={this.context.store}><MuiThemeProvider><Messenger
             roomName={room.name} roomID={room._id} socket={this.socket}/></MuiThemeProvider>
@@ -204,6 +206,8 @@ class Greeter extends React.Component {
             type: 'SET_RM_LIST',
             rooms: response.rooms
         });
+
+        this.socket.removeAllListeners();
 
         if (response.rooms.length) {
             ReactDOM.unmountComponentAtNode(container);

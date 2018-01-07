@@ -77,6 +77,7 @@ mongoose.connect(config.database, {useMongoClient: true}).then(function () {
 
             saveMessage(data, function () {
                 socket.in(data.room).emit('new-message');
+                socket.emit('new-message');
             });
         });
     });

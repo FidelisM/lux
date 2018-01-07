@@ -42,7 +42,6 @@ class Messenger extends React.Component {
     }
 
     componentDidUpdate() {
-        document.querySelector('.messenger-author .user-input').value = '';
         this.focusLatestMessage();
     }
 
@@ -87,10 +86,7 @@ class Messenger extends React.Component {
         let self = this;
 
         this.props.socket.emit('room', self.props.roomID);
-
-        this.props.socket.on('new-message', function () {
-            self._getMessages();
-        });
+        this.props.socket.on('new-message', self._getMessages.bind(self));
     }
 
     _handleMessagesLoadFailure() {
@@ -103,6 +99,11 @@ class Messenger extends React.Component {
         this.props.socket.emit('message', {
             message: state.newMessage,
             room: this.props.roomID
+        });
+
+        this.props.dispatch({
+            type: 'ADD_NEW_MESSAGE',
+            newMessage: ''
         });
     }
 
@@ -128,7 +129,7 @@ class Messenger extends React.Component {
                         </div>
                         <div className={"messenger-author"}>
                             <div className="message-author-content">
-                                <TextField floatingLabelText="Get Involved" type="text"
+                                <TextField floatingLabelText="Get Involved" type="text" value={this.props.newMessage}
                                            className="user-input inline-block" id="user-input"
                                            multiLine={true} rows={3} rowsMax={6} style={this.styles.input}
                                            onChange={this.handleNewMessage.bind(this)}/>
