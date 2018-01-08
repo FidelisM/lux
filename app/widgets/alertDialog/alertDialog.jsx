@@ -21,7 +21,7 @@ class AlertDialog extends React.Component {
         return (
             <MuiThemeProvider>
                 <div className="alert-overlay">
-                    <Dialog contentStyle={{width: this.props.width}} style={this.props.style}
+                    <Dialog title={this.props.title || ''} contentStyle={{width: this.props.width}} style={this.props.style}
                             actions={<FlatButton label={this.props.label} onClick={this.handleClose.bind(this)}/>}
                             primary={true} open={true}
                             onClick={this.handleClose.bind(this)}>{this.props.content}</Dialog>

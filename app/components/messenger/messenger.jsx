@@ -82,15 +82,15 @@ class Messenger extends React.Component {
         });
     }
 
+    _handleMessagesLoadFailure() {
+
+    }
+
     _initializeSocket() {
         let self = this;
 
         this.props.socket.emit('room', self.props.roomID);
         this.props.socket.on('new-message', self._getMessages.bind(self));
-    }
-
-    _handleMessagesLoadFailure() {
-
     }
 
     sendMessage() {

@@ -14,7 +14,9 @@ export default {
         create: '/spoqn/convo/create',
         allRooms: '/spoqn/convo',
         addMember: '/spoqn/convo/member/add',
-        getMessages: '/spoqn/convo/:id'
+        removeMember: '/spoqn/convo/member/remove',
+        getMessages: '/spoqn/convo/:id',
+        getMembers: '/spoqn/convo/member/:id'
     },
     friend: {
         add: '/spoqn/friends/add',

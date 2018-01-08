@@ -2,3 +2,7 @@
     display: inline-flex;
     margin: 5px;
 }
+
+.friend-card .friend-card-header img {
+    object-fit: cover;
+}

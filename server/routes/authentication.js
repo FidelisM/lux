@@ -42,7 +42,7 @@ router.get('/spoqn/refresh', function (request, response) {
     } else {
         return response.status(401).send({
             success: false,
-            msg: 'You need to be logged in to see this.'
+            msg: 'Please login to view this content.'
         });
     }
 

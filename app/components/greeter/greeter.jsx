@@ -212,7 +212,8 @@ class Greeter extends React.Component {
         if (response.rooms.length) {
             ReactDOM.unmountComponentAtNode(container);
             ReactDOM.render(<Provider store={this.context.store}><MuiThemeProvider><Messenger
-                roomName={response.rooms[0].name} roomID={response.rooms[0]._id} socket={this.socket}/></MuiThemeProvider>
+                roomName={response.rooms[0].name} roomID={response.rooms[0]._id}
+                socket={this.socket}/></MuiThemeProvider>
             </Provider>, container);
         }
     }
@@ -275,8 +276,10 @@ class Greeter extends React.Component {
 
     }
 
-    handleAddMemberClick(roomID) {
+    handleEditMembersClick(roomID, roomName) {
         let self = this,
+            members,
+            friends,
             container = document.getElementById('overlay'),
             content = (friends) => {
                 return (
@@ -284,6 +287,7 @@ class Greeter extends React.Component {
                         return <FriendCard username={friend.username} email={friend.email} key={friend._id}
                                            handleAdd={self.addMember.bind(self, friend, roomID)}
                                            handleRemove={self.removeMember.bind(self, friend, roomID)}
+                                           friends={friends} members={members}
                         />
                     })
                 )
@@ -291,10 +295,17 @@ class Greeter extends React.Component {
             closeCB = () => {
             };
 
-        this._getFriends().then(function (response) {
-            ReactDOM.unmountComponentAtNode(container);
-            ReactDOM.render(<AlertDialog content={content(response.friends)} closeCB={closeCB.bind(self)}
-                                         label="Done"/>, container);
+        this.getMembers(roomID).then(function (response) {
+            members = response.members;
+
+            self._getFriends().then(function (response) {
+                friends = response.friends;
+
+                ReactDOM.unmountComponentAtNode(container);
+                ReactDOM.render(<AlertDialog title={'Edit ' + roomName + ' Members'} content={content(friends)}
+                                             closeCB={closeCB.bind(self)} style={{minWidth: 400}}
+                                             label="Done"/>, container);
+            });
         });
     }
 
@@ -310,22 +321,90 @@ class Greeter extends React.Component {
                     roomID: roomID
                 },
                 url: services.room.addMember
-            };
+            },
+            promise = serviceManager.post(options);
 
-        serviceManager.post(options).then(function (response) {
+        promise.then(function (response) {
             (response.success) ? self._handleAddMemberSuccess(response) : self._handleAddMemberFailure(response);
         }).catch(self._handleAddFriendFailure.bind(self));
+
+        return promise;
     }
 
-    _handleAddMemberSuccess() {
-
+    _handleAddMemberSuccess(response) {
+        this.props.dispatch({
+            type: 'UPDATE_MEMBER_LIST',
+            members: response.members
+        });
     }
 
     _handleAddMemberFailure() {
 
     }
 
-    removeMember() {
+    getMembers(roomID) {
+        let self = this,
+            token = localStorage.getItem('token'),
+            options = {
+                headers: {
+                    Authorization: token
+                },
+                url: services.room.getMembers.replace(':id', roomID)
+            },
+            promise = serviceManager.get(options);
+
+        promise.then(function (response) {
+            if (response.success) {
+                self._handleMemberLoadSuccess(response);
+            } else {
+                self._handleMemberLoadFailure(response);
+            }
+        }).catch(self._handleMemberLoadFailure.bind(self));
+
+        return promise;
+    }
+
+    _handleMemberLoadSuccess(response) {
+        this.props.dispatch({
+            type: 'UPDATE_MEMBER_LIST',
+            members: response.members
+        });
+    }
+
+    _handleMemberLoadFailure() {
+
+    }
+
+    removeMember(friend, roomID) {
+        let self = this,
+            token = localStorage.getItem('token'),
+            options = {
+                headers: {
+                    Authorization: token
+                },
+                data: {
+                    member: friend,
+                    roomID: roomID
+                },
+                url: services.room.removeMember
+            },
+            promise = serviceManager.post(options);
+
+        promise.then(function (response) {
+            (response.success) ? self._handleRemoveMemberSuccess(response) : self._handleRemoveMemberFailure(response);
+        }).catch(self._handleRemoveMemberFailure.bind(self));
+
+        return promise;
+    }
+
+    _handleRemoveMemberSuccess(response) {
+        this.props.dispatch({
+            type: 'UPDATE_MEMBER_LIST',
+            members: response.members
+        });
+    }
+
+    _handleRemoveMemberFailure() {
 
     }
 
@@ -389,7 +468,7 @@ class Greeter extends React.Component {
                                 (<div key={room._id}>
                                     <ListItem onClick={this.openRoom.bind(this, room)}
                                               rightIcon={<ConversationMenu
-                                                  data-edit-members={this.handleAddMemberClick.bind(this, room._id)}/>}
+                                                  data-edit-members={this.handleEditMembersClick.bind(this, room._id, room.name)}/>}
                                               primaryText={room.name}
                                               secondaryText={moment(room.updatedAt).format('MMM Do YYYY, h:mm a')}/>
                                     <Divider inset={true}/>
@@ -424,8 +503,8 @@ const ConversationMenu = (props) => (
     </IconButton>}
               targetOrigin={{horizontal: 'left', vertical: 'top'}}
               anchorOrigin={{horizontal: 'left', vertical: 'bottom'}}>
-        <MenuItem onClick={props['data-rename']} primaryText='Rename Room' rightIcon={<PencilIcon/>}/>
-        <MenuItem onClick={props['data-delete']} primaryText='Delete Room' rightIcon={<DeleteIcon/>}/>
+        <MenuItem disabled={true} onClick={props['data-rename']} primaryText='Rename Room' rightIcon={<PencilIcon/>}/>
+        <MenuItem disabled={true} onClick={props['data-delete']} primaryText='Delete Room' rightIcon={<DeleteIcon/>}/>
         <MenuItem onClick={props['data-edit-members']} primaryText='Edit Members' rightIcon={<GroupAddIcon/>}/>
     </IconMenu>
 );
@@ -436,6 +515,7 @@ Greeter.propTypes = {
     rooms: PropTypes.array,
     friend: PropTypes.string,
     friends: PropTypes.array,
+    members: PropTypes.array,
     drawerOpen: PropTypes.bool
 };
 
@@ -450,6 +530,7 @@ function mapStateToProps(state) {
         rooms: state.greeterReducer.rooms,
         friend: state.greeterReducer.friend,
         friends: state.greeterReducer.friends,
+        members: state.greeterReducer.members,
         drawerOpen: state.greeterReducer.drawerOpen
     };
 }

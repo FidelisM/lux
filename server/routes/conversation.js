@@ -111,16 +111,73 @@ router.post('/spoqn/convo/member/add', function (request, response) {
             if (err) {
                 return response.json({
                     success: true,
-                    msg: 'Could Not Add Member To Conversation. ' + err
+                    msg: 'Could Not Add Member To Conversation. ' + err.toString()
                 });
             }
 
-            return response.json({
-                success: true,
-                msg: 'Member Added.'
+            getMessages(db, {room: request.body.roomID}, function (err, convosList) {
+                response.json({
+                    success: true,
+                    members: (convosList[0] && convosList[0].members) || []
+                });
             });
         })
 
+    })(request, response);
+});
+
+router.post('/spoqn/convo/member/remove', function (request, response) {
+    let db = router.getDB(),
+        passport = router.getPassport();
+
+    passport.authenticate('custom-jwt', function (err) {
+        if (err) {
+            return response.status(401).send({
+                success: false,
+                msg: 'Unauthorized.'
+            });
+        }
+
+        let ObjectId = mongoose.Types.ObjectId,
+            id = new ObjectId(request.body.roomID);
+
+        db.collection('conversations').findOneAndUpdate({_id: id}, {$pull: {members: request.body.member.email}}, function (err) {
+            if (err) {
+                return response.json({
+                    success: true,
+                    msg: 'Could Not Remove Member From Conversation. ' + err.toString()
+                });
+            }
+
+            getMessages(db, {room: request.body.roomID}, function (err, convosList) {
+                response.json({
+                    success: true,
+                    members: (convosList[0] && convosList[0].members) || []
+                });
+            });
+        })
+
+    })(request, response);
+});
+
+router.get('/spoqn/convo/member/:id', function (request, response) {
+    let db = router.getDB(),
+        passport = router.getPassport();
+
+    passport.authenticate('custom-jwt', function (err) {
+        if (err) {
+            return response.status(401).send({
+                success: false,
+                msg: 'Unauthorized.'
+            });
+        }
+
+        getMessages(db, {room: request.params.id}, function (err, convosList) {
+            response.json({
+                success: true,
+                members: (convosList[0] && convosList[0].members) || []
+            });
+        });
     })(request, response);
 });
 
