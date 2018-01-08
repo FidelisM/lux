@@ -20,6 +20,10 @@
     grid-template-columns: 45px 1fr;
 }
 
+.message-list .chat-content.user {
+    grid-template-columns: 1fr 45px;
+}
+
 .message-list .chat-content .message-content {
     padding: 0 5px;
 }
