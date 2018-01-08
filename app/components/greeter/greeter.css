@@ -1,3 +1,10 @@
 .greeter-component {
     flex: 0 0 100%
 }
+
+.greeter-component .messenger {
+    height: calc(100% - 66px);
+    position: relative;
+    display: flex;
+    justify-content: center;
+}
