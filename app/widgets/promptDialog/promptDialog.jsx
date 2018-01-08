@@ -32,7 +32,7 @@ export default class PromptDialog extends React.Component {
     getActions() {
         return [
             <FlatButton label={this.props.cancelLabel || 'Cancel'} onClick={this.handleClose.bind(this)}/>,
-            <FlatButton label={this.props.successLabel || 'Yes'} onClick={this.handleNext.bind(this)}/>
+            <FlatButton label={this.props.successLabel || 'Yes'} onClick={this.handleNext.bind(this)} primary={true}/>
         ]
     }
 

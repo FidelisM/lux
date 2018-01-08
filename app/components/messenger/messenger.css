@@ -11,6 +11,10 @@
     flex: 0 0 40%;
 }
 
+.messenger-component .content .header {
+    cursor: move;
+}
+
 .messenger-component .messenger-view {
     min-height: 200px;
     overflow: auto;

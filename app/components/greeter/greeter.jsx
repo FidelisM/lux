@@ -304,7 +304,7 @@ class Greeter extends React.Component {
                 ReactDOM.unmountComponentAtNode(container);
                 ReactDOM.render(<AlertDialog title={'Edit ' + roomName + ' Members'} content={content(friends)}
                                              closeCB={closeCB.bind(self)} style={{minWidth: 400}}
-                                             label="Done"/>, container);
+                                             label="Done" customClass={'edit-friends'}/>, container);
             });
         });
     }

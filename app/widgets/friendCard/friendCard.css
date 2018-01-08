@@ -1,6 +1,6 @@
 .friend-card {
     display: inline-flex;
-    margin: 5px;
+    margin: 10px;
 }
 
 .friend-card .friend-card-header img {

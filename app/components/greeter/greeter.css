@@ -8,3 +8,9 @@
     display: flex;
     justify-content: center;
 }
+
+.alert-overlay-content.edit-friends {
+    display: inline-grid;
+    grid-template-columns: 50% 50%;
+    margin-left: 35px;
+}
