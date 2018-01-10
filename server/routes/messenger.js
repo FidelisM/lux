@@ -3,11 +3,12 @@
 const express = require('express'),
     mongoose = require('mongoose'),
     jwt = require('jsonwebtoken'),
-    moment = require('moment'),
-    config = require('../dbconfig/database'),
-    messageSchema = require('../schema/message');
+    moment = require('moment');
 
-const router = express.Router();
+const router = express.Router(),
+    errorMessages = require('../errorMessages'),
+    config = require('../config/database'),
+    messageSchema = require('../schema/message');
 
 router.get('/spoqn/messenger/open/:id', function (request, response) {
     let db = router.getDB(),
@@ -17,7 +18,7 @@ router.get('/spoqn/messenger/open/:id', function (request, response) {
         if (err) {
             return response.status(401).send({
                 success: false,
-                msg: 'Unauthorized.'
+                msg: errorMessages["401"].message
             });
         }
 

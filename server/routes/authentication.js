@@ -2,35 +2,10 @@
 
 const express = require('express'),
     userSchema = require('../schema/user'),
-    config = require('../dbconfig/database'),
+    config = require('../config/database'),
     jwt = require('jsonwebtoken');
 
 const router = express.Router();
-
-router.get('/spoqn/users', function (request, response) {
-    let db = router.getDB(),
-        token = getToken(request.headers);
-
-    if (token) {
-        jwt.verify(token, config.secret, function (err) {
-            if (err) {
-                return response.status(403).send({
-                    success: false,
-                    msg: 'Unauthorized.'
-                });
-            }
-
-            db.collection('users').find().toArray(function (err, results) {
-                response.send(results);
-            });
-        });
-    } else {
-        return response.status(403).send({
-            success: false,
-            msg: 'Unauthorized.'
-        });
-    }
-});
 
 router.get('/spoqn/refresh', function (request, response) {
     let token = getToken(request.headers),

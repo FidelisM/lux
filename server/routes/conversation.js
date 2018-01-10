@@ -4,7 +4,8 @@ const express = require('express'),
     mongoose = require('mongoose');
 
 const router = express.Router(),
-    convoSchema = require('../schema/conversation');
+    convoSchema = require('../schema/conversation'),
+    errorMessages = require('../errorMessages');
 
 router.get('/spoqn/convo', function (request, response) {
     let db = router.getDB(),
@@ -14,7 +15,7 @@ router.get('/spoqn/convo', function (request, response) {
         if (err) {
             return response.status(401).send({
                 success: false,
-                msg: 'Unauthorized.'
+                msg: errorMessages["401"].message
             });
         }
         db.collection('users').findOne({username: loggedInUsername}, function (err, creator) {
@@ -52,7 +53,7 @@ router.post('/spoqn/convo/create', function (request, response) {
         if (err) {
             return response.status(401).send({
                 success: false,
-                msg: 'Unauthorized.'
+                msg: errorMessages["401"].message
             });
         }
 
@@ -100,7 +101,7 @@ router.post('/spoqn/convo/member/add', function (request, response) {
         if (err) {
             return response.status(401).send({
                 success: false,
-                msg: 'Unauthorized.'
+                msg: errorMessages["401"].message
             });
         }
 
@@ -134,7 +135,7 @@ router.post('/spoqn/convo/member/remove', function (request, response) {
         if (err) {
             return response.status(401).send({
                 success: false,
-                msg: 'Unauthorized.'
+                msg: errorMessages["401"].message
             });
         }
 
@@ -168,7 +169,7 @@ router.get('/spoqn/convo/member/:id', function (request, response) {
         if (err) {
             return response.status(401).send({
                 success: false,
-                msg: 'Unauthorized.'
+                msg: errorMessages["401"].message
             });
         }
 
@@ -189,7 +190,7 @@ router.get('/spoqn/convo/:id', function (request, response) {
         if (err) {
             return response.status(401).send({
                 success: false,
-                msg: 'Unauthorized.'
+                msg: errorMessages["401"].message
             });
         }
 

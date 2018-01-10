@@ -2,5 +2,9 @@
   "11000" : {
     "description" : "Duplicate Key Error",
     "message": "Duplicate Key Error"
+  },
+  "401": {
+    "description" : "Authentication error",
+    "message": "Unauthorized. Please login to continue."
   }
 }
