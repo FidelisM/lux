@@ -68,7 +68,7 @@ router.post('/spoqn/convo/create', function (request, response) {
                 if (err) {
                     return response.send({
                         success: false,
-                        message: 'Failed to create conversation'
+                        msg: 'Failed to create ' + request.body.name +'. Please try again.'
                     });
                 }
 
@@ -83,7 +83,8 @@ router.post('/spoqn/convo/create', function (request, response) {
                         convos.toArray(function (err, convosList) {
                             response.json({
                                 success: true,
-                                rooms: convosList
+                                rooms: convosList,
+                                msg: request.body.name + ' has been created.'
                             });
                         });
                     });
@@ -93,7 +94,7 @@ router.post('/spoqn/convo/create', function (request, response) {
     })(request, response);
 });
 
-router.post('/spoqn/convo/member/add', function (request, response) {
+router.post('/spoqn/convo/members/add', function (request, response) {
     let db = router.getDB(),
         passport = router.getPassport();
 
@@ -108,18 +109,19 @@ router.post('/spoqn/convo/member/add', function (request, response) {
         let ObjectId = mongoose.Types.ObjectId,
             id = new ObjectId(request.body.roomID);
 
-        db.collection('conversations').findOneAndUpdate({_id: id}, {$push: {members: request.body.member.email}}, function (err) {
+        db.collection('conversations').findOneAndUpdate({_id: id}, {$push: {members: request.body.member.email}}, function (err, result) {
             if (err) {
                 return response.json({
                     success: true,
-                    msg: 'Could Not Add Member To Conversation. ' + err.toString()
+                    msg: 'We were unable add ' + request.body.member.email + ' to ' + result.value.name + '. Please try again later.'
                 });
             }
 
             getMessages(db, {room: request.body.roomID}, function (err, convosList) {
                 response.json({
                     success: true,
-                    members: (convosList[0] && convosList[0].members) || []
+                    members: (convosList[0] && convosList[0].members) || [],
+                    msg: request.body.member.email + ' has been added to ' + result.value.name + '.'
                 });
             });
         })
@@ -127,7 +129,7 @@ router.post('/spoqn/convo/member/add', function (request, response) {
     })(request, response);
 });
 
-router.post('/spoqn/convo/member/remove', function (request, response) {
+router.post('/spoqn/convo/members/remove', function (request, response) {
     let db = router.getDB(),
         passport = router.getPassport();
 
@@ -142,18 +144,19 @@ router.post('/spoqn/convo/member/remove', function (request, response) {
         let ObjectId = mongoose.Types.ObjectId,
             id = new ObjectId(request.body.roomID);
 
-        db.collection('conversations').findOneAndUpdate({_id: id}, {$pull: {members: request.body.member.email}}, function (err) {
+        db.collection('conversations').findOneAndUpdate({_id: id}, {$pull: {members: request.body.member.email}}, function (err, result) {
             if (err) {
                 return response.json({
                     success: true,
-                    msg: 'Could Not Remove Member From Conversation. ' + err.toString()
+                    msg: 'We were unable to remove ' + request.body.member.email + ' from ' + result.value.name + '. Please try again later.'
                 });
             }
 
             getMessages(db, {room: request.body.roomID}, function (err, convosList) {
                 response.json({
                     success: true,
-                    members: (convosList[0] && convosList[0].members) || []
+                    members: (convosList[0] && convosList[0].members) || [],
+                    msg: request.body.member.email + ' has been removed from ' + result.value.name + '.'
                 });
             });
         })
@@ -161,7 +164,7 @@ router.post('/spoqn/convo/member/remove', function (request, response) {
     })(request, response);
 });
 
-router.get('/spoqn/convo/member/:id', function (request, response) {
+router.get('/spoqn/convo/members/:id', function (request, response) {
     let db = router.getDB(),
         passport = router.getPassport();
 
@@ -182,7 +185,7 @@ router.get('/spoqn/convo/member/:id', function (request, response) {
     })(request, response);
 });
 
-router.get('/spoqn/convo/:id', function (request, response) {
+router.get('/spoqn/convo/messages/:id', function (request, response) {
     let db = router.getDB(),
         passport = router.getPassport();
 

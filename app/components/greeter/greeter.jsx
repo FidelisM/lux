@@ -10,6 +10,7 @@ import io from 'socket.io-client';
 
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 
+import Notification from 'Components/nofification/notification';
 import Messenger from 'Components/messenger/messenger';
 import PromptDialog from 'Widgets/promptDialog/promptDialog';
 import AlertDialog from 'Widgets/alertDialog/alertDialog';
@@ -39,6 +40,7 @@ import InfoIcon from 'material-ui/svg-icons/action/info-outline';
 import DeleteIcon from 'material-ui/svg-icons/action/delete-forever';
 
 import './greeter.css';
+
 
 const groupAddIconStyles = {
     fill: '#FFFFFF',
@@ -166,11 +168,23 @@ class Greeter extends React.Component {
     }
 
     _handleCreateSuccess(response) {
+        let container = document.getElementById('snackbar');
+
+        if (response.msg) {
+            ReactDOM.unmountComponentAtNode(container);
+            ReactDOM.render(<Notification open={true} message={response.msg}/>, container);
+        }
+
         this._handleFetchSuccess(response);
     }
 
     _handleCreateFailure(response) {
-        console.log(response);
+        let container = document.getElementById('snackbar');
+
+        if (response.msg) {
+            ReactDOM.unmountComponentAtNode(container);
+            ReactDOM.render(<Notification open={true} message={response.msg}/>, container);
+        }
     }
 
     openRoom(room) {
@@ -268,12 +282,22 @@ class Greeter extends React.Component {
         }).catch(self._handleAddFriendFailure.bind(self));
     }
 
-    _handleAddFriendSuccess() {
+    _handleAddFriendSuccess(response) {
+        let container = document.getElementById('snackbar');
 
+        if (response.msg) {
+            ReactDOM.unmountComponentAtNode(container);
+            ReactDOM.render(<Notification open={true} message={response.msg}/>, container);
+        }
     }
 
-    _handleAddFriendFailure() {
+    _handleAddFriendFailure(response) {
+        let container = document.getElementById('snackbar');
 
+        if (response.msg) {
+            ReactDOM.unmountComponentAtNode(container);
+            ReactDOM.render(<Notification open={true} message={response.msg}/>, container);
+        }
     }
 
     handleEditMembersClick(roomID, roomName) {
@@ -332,14 +356,26 @@ class Greeter extends React.Component {
     }
 
     _handleAddMemberSuccess(response) {
+        let container = document.getElementById('snackbar');
+
+        if (response.msg) {
+            ReactDOM.unmountComponentAtNode(container);
+            ReactDOM.render(<Notification open={true} message={response.msg}/>, container);
+        }
+
         this.props.dispatch({
             type: 'UPDATE_MEMBER_LIST',
             members: response.members
         });
     }
 
-    _handleAddMemberFailure() {
+    _handleAddMemberFailure(response) {
+        let container = document.getElementById('snackbar');
 
+        if (response.msg) {
+            ReactDOM.unmountComponentAtNode(container);
+            ReactDOM.render(<Notification open={true} message={response.msg}/>, container);
+        }
     }
 
     getMembers(roomID) {
@@ -372,7 +408,12 @@ class Greeter extends React.Component {
     }
 
     _handleMemberLoadFailure() {
+        let container = document.getElementById('snackbar');
 
+        if (response.msg) {
+            ReactDOM.unmountComponentAtNode(container);
+            ReactDOM.render(<Notification open={true} message={response.msg}/>, container);
+        }
     }
 
     removeMember(friend, roomID) {
@@ -398,14 +439,26 @@ class Greeter extends React.Component {
     }
 
     _handleRemoveMemberSuccess(response) {
+        let container = document.getElementById('snackbar');
+
+        if (response.msg) {
+            ReactDOM.unmountComponentAtNode(container);
+            ReactDOM.render(<Notification open={true} message={response.msg}/>, container);
+        }
+
         this.props.dispatch({
             type: 'UPDATE_MEMBER_LIST',
             members: response.members
         });
     }
 
-    _handleRemoveMemberFailure() {
+    _handleRemoveMemberFailure(response) {
+        let container = document.getElementById('snackbar');
 
+        if (response.msg) {
+            ReactDOM.unmountComponentAtNode(container);
+            ReactDOM.render(<Notification open={true} message={response.msg}/>, container);
+        }
     }
 
     _getFriends() {

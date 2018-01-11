@@ -69,7 +69,7 @@ router.post('/spoqn/friends/add', function (request, response) {
                     if (err) {
                         return response.json({
                             success: false,
-                            msg: request.body.friend + ' has been added to your friend list.' +
+                            msg: request.body.friend + ' has been added to your friend list. ' +
                             'But there was a problem sending an email invitation. Please try again later.'
                         });
                     }
@@ -145,7 +145,7 @@ sendEmailInvite = function (email, sender, callback) {
         from: process.env.EMAIL_USER,
         to: email,
         subject: 'Spoqn Invitation',
-        text: 'You have been invited by ' + sender + ' to join the converation @ chat.spoqn.io'
+        text: 'You have been invited by ' + sender + ' to join the converation @ http://chat.spoqn.io'
     };
 
     return transporter.sendMail(mailOptions, callback);
