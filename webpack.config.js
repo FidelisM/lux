@@ -41,6 +41,17 @@ module.exports = {
             {
                 test: /\.json$/,
                 loader: 'json-loader'
+            },
+            {
+                test: /\.(png|jpg|gif|ico)$/,
+                use: [
+                    {
+                        loader: 'file-loader',
+                        options: {
+                            name: './dist/[name].[ext]'
+                        }
+                    }
+                ]
             }
         ]
     },

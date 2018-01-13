@@ -19,6 +19,8 @@ import services from 'Services';
 import serviceManager from 'ServiceManager';
 import Fingerprint2 from "fingerprintjs2";
 
+import './favicon.ico';
+
 const history = createHashHistory();
 const middleware = routerMiddleware(history);
 
