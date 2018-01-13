@@ -126,10 +126,27 @@ class Greeter extends React.Component {
     }
 
     handleRoomNameChange(evt) {
-        this.props.dispatch({
-            type: 'SET_RM_NAME',
-            room: evt.currentTarget.value
-        });
+        let roomName = evt.currentTarget.value;
+
+        if (roomName) {
+            this.promptDialog.setState({
+                nextDisabled: false
+            });
+
+            this.props.dispatch({
+                type: 'SET_RM_NAME',
+                room: roomName
+            });
+        } else {
+            this.promptDialog.setState({
+                nextDisabled: true
+            });
+
+            this.props.dispatch({
+                type: 'SET_RM_NAME',
+                room: ''
+            });
+        }
     }
 
     createRoom() {
@@ -146,9 +163,11 @@ class Greeter extends React.Component {
                 url: services.room.create
             };
 
-        serviceManager.post(options).then(function (response) {
-            (response.success) ? self._handleCreateSuccess(response) : self._handleCreateFailure(response);
-        }).catch(self._handleCreateFailure.bind(self));
+        if (!state.room) {
+            serviceManager.post(options).then(function (response) {
+                (response.success) ? self._handleCreateSuccess(response) : self._handleCreateFailure(response);
+            }).catch(self._handleCreateFailure.bind(self));
+        }
     }
 
     handleCreateRoomClick() {
@@ -158,6 +177,7 @@ class Greeter extends React.Component {
                 title: 'Create A Room',
                 successLabel: 'Create',
                 proceedCB: self.createRoom.bind(self),
+                nextDisabled: true,
                 content: () => {
                     return (<TextField
                         floatingLabelText="Room Name"
@@ -168,7 +188,9 @@ class Greeter extends React.Component {
             container = document.querySelector('#overlay');
 
         ReactDOM.unmountComponentAtNode(container);
-        ReactDOM.render(<PromptDialog {...props} />, container);
+        ReactDOM.render(<PromptDialog {...props} ref={function (promptDialog) {
+            self.promptDialog = promptDialog;
+        }.bind(this)}/>, container);
     }
 
     _handleCreateSuccess(response) {
