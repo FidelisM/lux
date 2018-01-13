@@ -76,6 +76,10 @@ class Greeter extends React.Component {
         super(props);
 
         this._initializeSocket();
+
+        this.state = {
+            emailErrorText: ''
+        }
     }
 
     componentDidMount() {
@@ -243,9 +247,14 @@ class Greeter extends React.Component {
                 title: 'Add Friend',
                 successLabel: 'Add',
                 proceedCB: self.addFriend.bind(self),
+                nextDisabled: true,
                 content: () => {
                     return (<TextField
+                        ref={function (textField) {
+                            self.addFriendEmailTextField = textField;
+                        }.bind(this)}
                         floatingLabelText="E-mail Address"
+                        errorText={self.state.emailErrorText}
                         onChange={self.handleFriendEmailChange.bind(self)}
                     />)
                 }
@@ -253,13 +262,38 @@ class Greeter extends React.Component {
             container = document.getElementById('overlay');
 
         ReactDOM.unmountComponentAtNode(container);
-        ReactDOM.render(<PromptDialog {...props} />, container);
+        ReactDOM.render(<PromptDialog {...props} ref={function (promptDialog) {
+            self.promptDialog = promptDialog;
+        }.bind(this)}/>, container);
     }
 
     handleFriendEmailChange(evt) {
+        let email = evt.currentTarget.value,
+            re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
+        if (!re.test(email.toLowerCase())) {
+            this.addFriendEmailTextField.setState({
+                errorText: 'Please enter a valid email address'
+            });
+
+            this.promptDialog.setState({
+                nextDisabled: true
+            });
+
+            return false;
+        }
+
+        this.addFriendEmailTextField.setState({
+            errorText: ''
+        });
+
+        this.promptDialog.setState({
+            nextDisabled: false
+        });
+
         this.props.dispatch({
             type: 'ADD_FRIEND',
-            friend: evt.currentTarget.value
+            friend: email
         });
     }
 
@@ -276,6 +310,17 @@ class Greeter extends React.Component {
                 },
                 url: services.friend.add
             };
+
+        let email = state.friend,
+            re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
+        if (!re.test(email.toLowerCase())) {
+            this.setState({
+                emailErrorText: 'Please enter a valid email address'
+            });
+
+            return;
+        }
 
         serviceManager.post(options).then(function (response) {
             (response.success) ? self._handleAddFriendSuccess(response) : self._handleAddFriendFailure(response);

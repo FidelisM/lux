@@ -20,6 +20,13 @@ class Login extends React.Component {
 
     constructor(props) {
         super(props);
+
+        this.state = {
+            usernameErrorText: '',
+            emailErrorText: '',
+            passwordErrorText: '',
+            passwordConfirmErrorText: ''
+        }
     }
 
     toggleLoginRegister(evt) {
@@ -40,7 +47,7 @@ class Login extends React.Component {
         activeView.classList.remove('active');
         hiddenView.classList.add('active');
 
-        self.props.dispatch({
+        this.props.dispatch({
             type: 'RESET_LOGIN_STATE'
         });
     }
@@ -59,14 +66,16 @@ class Login extends React.Component {
                 url: services.register.url
             };
 
-        //memory leak?
-        new Fingerprint2().get(function (result) {
-            options.data.browser = result;
+        if (this._inputIsValid(options.data)) {
+            //memory leak?
+            new Fingerprint2().get(function (result) {
+                options.data.browser = result;
 
-            serviceManager.post(options).then(function (response) {
-                (response.success) ? self._handleAuthSuccess(response) : self._handleAuthFailure(response);
-            }).catch(self._handleAuthFailure.bind(self));
-        });
+                serviceManager.post(options).then(function (response) {
+                    (response.success) ? self._handleAuthSuccess(response) : self._handleAuthFailure(response);
+                }).catch(self._handleAuthFailure.bind(self));
+            });
+        }
     }
 
     handleLoginButtonClick() {
@@ -90,17 +99,52 @@ class Login extends React.Component {
         });
     }
 
-    validateInput() {
+    _inputIsValid(form) {
+        let re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
+        if (form.passwordConfirm !== form.password) {
+            this.setState({
+                passwordErrorText: 'Passwords do not match.',
+                passwordConfirmErrorText: 'Passwords do not match.'
+            })
+        }
+
+        if (!form.password) {
+            this.setState({
+                passwordErrorText: 'A password is required.',
+                passwordConfirmErrorText: ''
+            })
+        }
+
+        if (!form.username) {
+            this.setState({
+                usernameErrorText: 'A username is required.',
+            })
+        }
+
+        if (!re.test(form.email.toLowerCase())) {
+            this.setState({
+                emailErrorText: 'Please enter a valid email address'
+            })
+        }
+
+        return re.test(form.email.toLowerCase()) && (form.passwordConfirm === form.password) && form.username;
     }
 
     handleInputChange(evt) {
         let inputField = evt.currentTarget,
             strAction = inputField.getAttribute('data-action'),
             strKey = inputField.getAttribute('data-field'),
-            stateObj = {type: 'SET_' + strAction};
+            stateObj = {type: 'SET_' + strAction},
+            localStateKey = strKey + 'ErrorText',
+            localStateObj = {};
 
         stateObj[strKey] = inputField.value;
+        localStateObj[localStateKey] = '';
+
+        if (this.state.hasOwnProperty(localStateKey)) {
+            this.setState(localStateObj);
+        }
 
         this.props.dispatch(stateObj);
     }
@@ -142,7 +186,7 @@ class Login extends React.Component {
         return (
             <div className="login-component">
                 <div className="module form-module">
-                    <div className="toggle" onClick={this.toggleLoginRegister}>
+                    <div className="toggle" onClick={this.toggleLoginRegister.bind(this)}>
                         <div className="info-tip">Register</div>
                     </div>
                     <div className="form active login-form">
@@ -162,19 +206,21 @@ class Login extends React.Component {
                         <div className="register-info">
                             <TextField type="text" floatingLabelText="Username" className="register-username"
                                        data-action="USERNAME" data-field="username"
-                                       onChange={this.handleInputChange.bind(this)}/>
+                                       onChange={this.handleInputChange.bind(this)}
+                                       errorText={this.state.usernameErrorText}/>
                             <TextField type="password" floatingLabelText="Password" className="register-password"
                                        data-action="PASSWORD" data-field="password"
-                                       onChange={this.handleInputChange.bind(this)}/>
+                                       onChange={this.handleInputChange.bind(this)}
+                                       errorText={this.state.passwordErrorText}/>
                             <TextField type="password" floatingLabelText="Confirm Password"
                                        className="conf-register-password"
                                        data-action="CONF_PASSWORD" data-field="passwordConfirm"
-                                       onChange={this.handleInputChange.bind(this)}/>
+                                       onChange={this.handleInputChange.bind(this)}
+                                       errorText={this.state.passwordConfirmErrorText}/>
                             <TextField type="email" floatingLabelText="Email Address" className="register-email"
                                        data-action="EMAIL" data-field="email"
                                        onChange={this.handleInputChange.bind(this)}
-                                       pattern="/^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/"
-                                       required/>
+                                       errorText={this.state.emailErrorText}/>
                             <TextField type="tel" floatingLabelText="Phone Number" className="register-tel"
                                        data-action="TEL"
                                        data-field="tel" onChange={this.handleInputChange.bind(this)}/>

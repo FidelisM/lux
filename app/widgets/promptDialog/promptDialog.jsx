@@ -9,7 +9,8 @@ export default class PromptDialog extends React.Component {
         super(props);
 
         this.state = {
-            open: true
+            open: true,
+            nextDisabled: this.props.nextDisabled
         }
     }
 
@@ -32,7 +33,8 @@ export default class PromptDialog extends React.Component {
     getActions() {
         return [
             <FlatButton label={this.props.cancelLabel || 'Cancel'} onClick={this.handleClose.bind(this)}/>,
-            <FlatButton label={this.props.successLabel || 'Yes'} onClick={this.handleNext.bind(this)} primary={true}/>
+            <FlatButton label={this.props.successLabel || 'Yes'} onClick={this.handleNext.bind(this)} primary={true}
+                        disabled={this.state.nextDisabled}/>
         ]
     }
 
