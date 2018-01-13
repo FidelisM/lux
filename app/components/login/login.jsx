@@ -50,6 +50,13 @@ class Login extends React.Component {
         this.props.dispatch({
             type: 'RESET_LOGIN_STATE'
         });
+
+        this.setState({
+            usernameErrorText: '',
+            emailErrorText: '',
+            passwordErrorText: '',
+            passwordConfirmErrorText: ''
+        });
     }
 
     handleRegisterButtonClick() {
