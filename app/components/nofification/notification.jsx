@@ -11,7 +11,7 @@ class Notification extends React.Component {
 
         this.state = {
             customClass: this.props.customClass || '',
-            autoHideDuration: 0,
+            autoHideDuration: 5000,
             message: this.props.message,
             open: this.props.open
         }

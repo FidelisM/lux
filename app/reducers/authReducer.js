@@ -39,6 +39,15 @@ export default function authReducer(state = defaultState, action) {
                 ...state,
                 auth: action.auth
             };
+        case 'RESET_LOGIN_STATE':
+            return {
+                email: '',
+                password: '',
+                passwordConfirm: '',
+                username: '',
+                tel: '',
+                auth: state.auth
+            };
         default:
             return state;
     }

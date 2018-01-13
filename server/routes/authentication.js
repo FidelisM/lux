@@ -46,6 +46,7 @@ router.get('/spoqn/refresh', function (request, response) {
                         response.json({
                             success: true,
                             username: decoded.username,
+                            msg: 'Welcome back!',
                             token: 'Bearer ' + token
                         });
                     } else {
@@ -79,7 +80,7 @@ router.post('/spoqn/register', function (request, response) {
             if (err) {
                 return response.send({
                     success: false,
-                    message: 'Registration failed.'
+                    msg: 'Registration failed.'
                 });
             }
 
@@ -93,7 +94,7 @@ router.post('/spoqn/register', function (request, response) {
 
             response.send({
                 success: true,
-                message: 'Registration successful. Welcome to lite show.',
+                msg: 'Registration successful. Welcome to spoqn.',
                 username: request.body.username,
                 token: 'Bearer ' + token
             });
@@ -124,12 +125,13 @@ router.post('/spoqn/login', function (request, response) {
                     response.json({
                         success: true,
                         username: request.body.username,
+                        msg: 'Welcome to spoqn.',
                         token: 'Bearer ' + token
                     });
                 } else {
                     response.send({
                         success: false,
-                        message: 'Authentication failed. Passwords did not match.'
+                        msg: 'Authentication failed. Username or password is incorrect.'
                     });
                 }
             });

@@ -7,9 +7,14 @@ import {push} from 'react-router-redux';
 import {connect} from 'react-redux';
 import {withRouter} from 'react-router-dom';
 
+import TextField from 'material-ui/TextField';
+import FlatButton from 'material-ui/FlatButton';
+import Notification from 'Components/nofification/notification';
+
 import kute from 'kute.js'
 import Fingerprint2 from 'fingerprintjs2'
 import './login.css'
+import ReactDOM from "react-dom";
 
 class Login extends React.Component {
 
@@ -34,6 +39,10 @@ class Login extends React.Component {
 
         activeView.classList.remove('active');
         hiddenView.classList.add('active');
+
+        self.props.dispatch({
+            type: 'RESET_LOGIN_STATE'
+        });
     }
 
     handleRegisterButtonClick() {
@@ -51,7 +60,7 @@ class Login extends React.Component {
             };
 
         //memory leak?
-        new Fingerprint2().get(function(result){
+        new Fingerprint2().get(function (result) {
             options.data.browser = result;
 
             serviceManager.post(options).then(function (response) {
@@ -72,13 +81,17 @@ class Login extends React.Component {
             };
 
         //memory leak?
-        new Fingerprint2().get(function(result){
+        new Fingerprint2().get(function (result) {
             options.data.browser = result;
 
             serviceManager.post(options).then(function (response) {
                 (response.success) ? self._handleAuthSuccess(response) : self._handleAuthFailure(response);
             }).catch(self._handleAuthFailure.bind(self));
         });
+    }
+
+    validateInput() {
+
     }
 
     handleInputChange(evt) {
@@ -93,7 +106,13 @@ class Login extends React.Component {
     }
 
     _handleAuthSuccess(response) {
-        let self = this;
+        let self = this,
+            container = document.getElementById('snackbar');
+
+        if (response.msg) {
+            ReactDOM.unmountComponentAtNode(container);
+            ReactDOM.render(<Notification open={true} message={response.msg}/>, container);
+        }
 
         localStorage.setItem('token', response.token);
 
@@ -110,15 +129,13 @@ class Login extends React.Component {
         self.context.store.dispatch(push('/home'));
     }
 
-    _handleAuthFailure() {
-        let self = this;
+    _handleAuthFailure(response) {
+        let container = document.getElementById('snackbar');
 
-        localStorage.removeItem('token');
-
-        self.props.dispatch({
-            type: 'SET_AUTH',
-            auth: ''
-        });
+        if (response.msg) {
+            ReactDOM.unmountComponentAtNode(container);
+            ReactDOM.render(<Notification open={true} message={response.msg}/>, container);
+        }
     }
 
     render() {
@@ -131,32 +148,37 @@ class Login extends React.Component {
                     <div className="form active login-form">
                         <h2>Login to your account</h2>
                         <div className="login-info">
-                            <input type="text" placeholder="Username" className="login-username" data-action="USERNAME"
-                                   data-field="username" onChange={this.handleInputChange.bind(this)}/>
-                            <input type="password" placeholder="Password" className="login-password"
-                                   data-field="password" data-action="PASSWORD"
-                                   onChange={this.handleInputChange.bind(this)}/>
-                            <button onClick={this.handleLoginButtonClick.bind(this)}>Login</button>
+                            <TextField type="text" floatingLabelText="Username" className="login-username"
+                                       data-action="USERNAME"
+                                       data-field="username" onChange={this.handleInputChange.bind(this)}/>
+                            <TextField type="password" floatingLabelText="Password" className="login-password"
+                                       data-field="password" data-action="PASSWORD"
+                                       onChange={this.handleInputChange.bind(this)}/>
+                            <FlatButton onClick={this.handleLoginButtonClick.bind(this)} label={"Login"}/>
                         </div>
                     </div>
                     <div className="form register-form">
                         <h2>Create an account</h2>
                         <div className="register-info">
-                            <input type="text" placeholder="Username" className="register-username"
-                                   data-action="USERNAME" data-field="username"
-                                   onChange={this.handleInputChange.bind(this)}/>
-                            <input type="password" placeholder="Password" className="register-password"
-                                   data-action="PASSWORD" data-field="password"
-                                   onChange={this.handleInputChange.bind(this)}/>
-                            <input type="password" placeholder="Confirm Password" className="conf-register-password"
-                                   data-action="CONF_PASSWORD" data-field="passwordConfirm"
-                                   onChange={this.handleInputChange.bind(this)}/>
-                            <input type="email" placeholder="Email Address" className="register-email"
-                                   data-action="EMAIL" data-field="email"
-                                   onChange={this.handleInputChange.bind(this)}/>
-                            <input type="tel" placeholder="Phone Number" className="register-tel" data-action="TEL"
-                                   data-field="tel" onChange={this.handleInputChange.bind(this)}/>
-                            <button onClick={this.handleRegisterButtonClick.bind(this)}>Register</button>
+                            <TextField type="text" floatingLabelText="Username" className="register-username"
+                                       data-action="USERNAME" data-field="username"
+                                       onChange={this.handleInputChange.bind(this)}/>
+                            <TextField type="password" floatingLabelText="Password" className="register-password"
+                                       data-action="PASSWORD" data-field="password"
+                                       onChange={this.handleInputChange.bind(this)}/>
+                            <TextField type="password" floatingLabelText="Confirm Password"
+                                       className="conf-register-password"
+                                       data-action="CONF_PASSWORD" data-field="passwordConfirm"
+                                       onChange={this.handleInputChange.bind(this)}/>
+                            <TextField type="email" floatingLabelText="Email Address" className="register-email"
+                                       data-action="EMAIL" data-field="email"
+                                       onChange={this.handleInputChange.bind(this)}
+                                       pattern="/^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/"
+                                       required/>
+                            <TextField type="tel" floatingLabelText="Phone Number" className="register-tel"
+                                       data-action="TEL"
+                                       data-field="tel" onChange={this.handleInputChange.bind(this)}/>
+                            <FlatButton onClick={this.handleRegisterButtonClick.bind(this)} label={"Register"}/>
                         </div>
                     </div>
                     <div className="cta"><a href="#">Forgot your password?</a></div>
