@@ -13,6 +13,12 @@ class AlertDialog extends React.Component {
         }
     }
 
+    componentDidMount() {
+        if (this.props.onRenderComplete) {
+            this.props.onRenderComplete();
+        }
+    }
+
     handleClose() {
         if (this.props.closeCB) {
             this.props.closeCB();
@@ -32,7 +38,7 @@ class AlertDialog extends React.Component {
                             primary={true} open={true}
                             onClick={this.handleClose.bind(this)}>
                         <div className={"alert-overlay-content " + this.state.customClass}>
-                            {this.props.content}
+                            {(typeof this.props.content === 'function') ? this.props.content() : this.props.content}
                         </div>
                     </Dialog>
                 </div>

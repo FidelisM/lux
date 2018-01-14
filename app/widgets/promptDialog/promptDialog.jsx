@@ -14,6 +14,12 @@ export default class PromptDialog extends React.Component {
         }
     }
 
+    componentDidMount() {
+        if (this.props.onRenderComplete) {
+            this.props.onRenderComplete();
+        }
+    }
+
     handleClose() {
         if (this.props.cancelCB) {
             this.props.cancelCB();

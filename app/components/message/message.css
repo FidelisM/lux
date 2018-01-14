@@ -6,10 +6,6 @@
     list-style-type: none;
 }
 
-.message-list .chat-head {
-
-}
-
 .message-list .chat-body {
     margin: 0 10px;
 }
@@ -21,7 +17,7 @@
 }
 
 .message-list .chat-content.user {
-    grid-template-columns: 1fr 45px;
+    grid-template-columns: 1fr 50px;
 }
 
 .message-list .chat-content .message-content {

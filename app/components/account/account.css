@@ -23,7 +23,17 @@
 .my-account-component .my-account-view {
     overflow: auto;
     margin: 10px;
-    height: 410px;
+    height: 575px;
+}
+
+.my-account-component .my-account-view .avatar-actions {
+    position: relative;
+}
+
+.my-account-component .my-account-view .avatar-actions .action-buttons {
+    position: absolute;
+    left: 50%;
+    top: 40%;
 }
 
 .my-account-component .my-account-view::-webkit-scrollbar-track {
@@ -41,4 +51,16 @@
 .my-account-component .my-account-view::-webkit-scrollbar-thumb {
     background-color: #AAA;
     border-radius: 10px;
+}
+
+.my-account-component .profile-picture {
+    height: 150px;
+    width: 150px;
+}
+
+.my-account-component .profile-picture .img-circle {
+    width: inherit;
+    height: inherit;
+    object-fit: cover;
+    border-radius: 50%;
 }
