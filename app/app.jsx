@@ -79,8 +79,10 @@ const authenticateUser = function () {
                 });
 
                 store.dispatch({
-                    type: 'SET_USERNAME',
-                    username: response.username
+                    type: 'SET_LOGGED_IN_USER',
+                    username: response.user.username,
+                    email: response.user.email,
+                    telephone: response.user.telephone
                 });
             }
             renderApplication();

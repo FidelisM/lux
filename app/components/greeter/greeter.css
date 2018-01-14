@@ -9,6 +9,13 @@
     justify-content: center;
 }
 
+.greeter-component .my-account {
+    height: calc(100% - 66px);
+    position: relative;
+    display: none;
+    justify-content: center;
+}
+
 .alert-overlay-content.edit-friends {
     display: inline-grid;
     grid-template-columns: 50% 50%;

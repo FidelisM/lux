@@ -11,6 +11,7 @@ import io from 'socket.io-client';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 
 import Notification from 'Components/nofification/notification';
+import Account from 'Components/account/account';
 import Messenger from 'Components/messenger/messenger';
 import PromptDialog from 'Widgets/promptDialog/promptDialog';
 import AlertDialog from 'Widgets/alertDialog/alertDialog';
@@ -34,7 +35,7 @@ import GroupAddIcon from 'material-ui/svg-icons/social/group-add';
 import AddIcon from 'material-ui/svg-icons/content/add';
 import PencilIcon from 'material-ui/svg-icons/content/create';
 import BlockIcon from 'material-ui/svg-icons/content/block';
-import RefreshIcon from 'material-ui/svg-icons/navigation/refresh';
+import SettingsIcon from 'material-ui/svg-icons/action/account-circle';
 import HelpIcon from 'material-ui/svg-icons/action/help';
 import InfoIcon from 'material-ui/svg-icons/action/info-outline';
 import DeleteIcon from 'material-ui/svg-icons/action/delete-forever';
@@ -115,10 +116,6 @@ class Greeter extends React.Component {
         });
 
         self.context.store.dispatch(push('/login'));
-    }
-
-    handleRefresh() {
-        location.reload();
     }
 
     handleHelp() {
@@ -214,13 +211,35 @@ class Greeter extends React.Component {
     }
 
     openRoom(room) {
-        let container = document.getElementsByClassName('messenger')[0];
+        let container = document.getElementsByClassName('messenger')[0],
+            myAccountContainer = document.getElementsByClassName('my-account')[0];
 
         this.socket.removeAllListeners();
 
+        myAccountContainer.style.display = 'none';
+        container.style.display = 'flex';
+
+        ReactDOM.unmountComponentAtNode(myAccountContainer);
         ReactDOM.unmountComponentAtNode(container);
+
         ReactDOM.render(<Provider store={this.context.store}><MuiThemeProvider><Messenger
             roomName={room.name} roomID={room._id} socket={this.socket}/></MuiThemeProvider>
+        </Provider>, container);
+    }
+
+    openMyAccount() {
+        let container = document.getElementsByClassName('my-account')[0],
+            mesengerContainer = document.getElementsByClassName('messenger')[0];
+
+        this.socket.removeAllListeners();
+
+        mesengerContainer.style.display = 'none';
+        container.style.display = 'flex';
+
+        ReactDOM.unmountComponentAtNode(document.getElementsByClassName('messenger')[0]);
+        ReactDOM.unmountComponentAtNode(container);
+
+        ReactDOM.render(<Provider store={this.context.store}><MuiThemeProvider><Account/></MuiThemeProvider>
         </Provider>, container);
     }
 
@@ -567,7 +586,7 @@ class Greeter extends React.Component {
                                     <GroupAddIcon style={groupAddIconStyles}
                                                   onClick={this.handleAddFriendClick.bind(this)}/>
                                     <Logged label={this.context.store.getState().authReducer.username}
-                                            data-refresh={this.handleRefresh.bind(this)}
+                                            data-my-account={this.openMyAccount.bind(this)}
                                             data-logout={this.handleLogOut.bind(this)}
                                             data-help={this.handleHelp.bind(this)}/>
                                 </div>
@@ -599,6 +618,8 @@ class Greeter extends React.Component {
                 </div>
                 <div className='messenger'>
                 </div>
+                <div className='my-account'>
+                </div>
             </div>
         );
     }
@@ -609,7 +630,7 @@ const Logged = (props) => (
               iconButtonElement={<FlatButton label={props.label} style={flatButtonStyles}/>}
               targetOrigin={{horizontal: 'right', vertical: 'top'}}
               anchorOrigin={{horizontal: 'right', vertical: 'bottom'}}>
-        <MenuItem onClick={props['data-refresh']} primaryText='Refresh' rightIcon={<RefreshIcon/>}/>
+        <MenuItem onClick={props['data-my-account']} primaryText='My Account' rightIcon={<SettingsIcon/>}/>
         <MenuItem onClick={props['data-help']} primaryText='Help' rightIcon={<HelpIcon/>}/>
         <MenuItem onClick={props['data-logout']} primaryText='Log Out' rightIcon={<BlockIcon/>}/>
     </IconMenu>

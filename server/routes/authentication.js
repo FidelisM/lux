@@ -45,7 +45,11 @@ router.get('/spoqn/refresh', function (request, response) {
 
                         response.json({
                             success: true,
-                            username: decoded.username,
+                            user: {
+                                email: user.email,
+                                username: user.username,
+                                telephone: user.telephone
+                            },
                             msg: 'Welcome back!',
                             token: 'Bearer ' + token
                         });
@@ -72,7 +76,7 @@ router.post('/spoqn/register', function (request, response) {
                 email: request.body.email,
                 username: request.body.username,
                 password: request.body.password,
-                telephone: request.body.tel
+                telephone: request.body.telephone
             },
             user = new userSchema(userData);
 
@@ -94,6 +98,11 @@ router.post('/spoqn/register', function (request, response) {
 
             response.send({
                 success: true,
+                user: {
+                    email: user.email,
+                    username: user.username,
+                    telephone: user.telephone
+                },
                 msg: 'Registration successful. Welcome to spoqn.',
                 username: request.body.username,
                 token: 'Bearer ' + token
@@ -124,7 +133,11 @@ router.post('/spoqn/login', function (request, response) {
 
                     response.json({
                         success: true,
-                        username: request.body.username,
+                        user: {
+                            email: user.email,
+                            username: user.username,
+                            telephone: user.telephone
+                        },
                         msg: 'Welcome to spoqn.',
                         token: 'Bearer ' + token
                     });

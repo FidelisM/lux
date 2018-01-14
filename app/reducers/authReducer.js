@@ -3,7 +3,7 @@ const defaultState = {
     password: '',
     passwordConfirm: '',
     username: '',
-    tel: '',
+    telephone: '',
     auth: ''
 };
 
@@ -32,7 +32,7 @@ export default function authReducer(state = defaultState, action) {
         case 'SET_TEL':
             return {
                 ...state,
-                tel: action.tel
+                telephone: action.telephone
             };
         case 'SET_AUTH':
             return {
@@ -45,8 +45,15 @@ export default function authReducer(state = defaultState, action) {
                 password: '',
                 passwordConfirm: '',
                 username: '',
-                tel: '',
+                telephone: '',
                 auth: state.auth
+            };
+        case 'SET_LOGGED_IN_USER':
+            return {
+                ...state,
+                email: action.email,
+                username: action.username,
+                telephone: action.telephone,
             };
         default:
             return state;

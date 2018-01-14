@@ -68,7 +68,7 @@ class Login extends React.Component {
                     password: state.password,
                     passwordConfirm: state.passwordConfirm,
                     email: state.email,
-                    tel: state.tel
+                    telephone: state.telephone
                 },
                 url: services.register.url
             };
@@ -173,8 +173,10 @@ class Login extends React.Component {
         });
 
         self.props.dispatch({
-            type: 'SET_USERNAME',
-            username: response.username
+            type: 'SET_LOGGED_IN_USER',
+            username: response.user.username,
+            email: response.user.email,
+            telephone: response.user.telephone
         });
 
         self.context.store.dispatch(push('/home'));
@@ -228,9 +230,9 @@ class Login extends React.Component {
                                        data-action="EMAIL" data-field="email"
                                        onChange={this.handleInputChange.bind(this)}
                                        errorText={this.state.emailErrorText}/>
-                            <TextField type="tel" floatingLabelText="Phone Number" className="register-tel"
+                            <TextField type="tel" floatingLabelText="Phone Number" className="register-telephone"
                                        data-action="TEL"
-                                       data-field="tel" onChange={this.handleInputChange.bind(this)}/>
+                                       data-field="telephone" onChange={this.handleInputChange.bind(this)}/>
                             <FlatButton onClick={this.handleRegisterButtonClick.bind(this)} label={"Register"}/>
                         </div>
                     </div>
@@ -246,7 +248,7 @@ Login.propTypes = {
     password: PropTypes.string,
     passwordConfirm: PropTypes.string,
     username: PropTypes.string,
-    tel: PropTypes.string,
+    telephone: PropTypes.string,
     auth: PropTypes.string
 };
 
@@ -256,11 +258,11 @@ Login.contextTypes = {
 
 function mapStateToProps(state) {
     return {
+        username: state.authReducer.username,
         email: state.authReducer.email,
         password: state.authReducer.password,
-        passwordConfirm: state.authReducer.password,
-        username: state.authReducer.password,
-        tel: state.authReducer.password,
+        passwordConfirm: state.authReducer.passwordConfirm,
+        telephone: state.authReducer.telephone,
         auth: state.authReducer.auth
     };
 }

@@ -1,6 +1,5 @@
 import React from 'react';
 import PromptDialog from 'Widgets/promptDialog/promptDialog';
-import ReactDOM from "react-dom";
 
 export default class Help extends React.Component {
     constructor(props) {
@@ -40,12 +39,9 @@ export default class Help extends React.Component {
         }
     }
 
-    componentDidMount() {
-        ReactDOM.render(<PromptDialog {...this.state} />, document.getElementById('overlay'));
-    }
-
     render() {
         return (<div>
+            <PromptDialog {...this.state} />
         </div>)
     }
 }
