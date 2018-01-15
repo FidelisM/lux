@@ -63,6 +63,7 @@ class Login extends React.Component {
         let self = this,
             state = this.context.store.getState().authReducer,
             options = {
+                headers: {},
                 data: {
                     username: state.username,
                     password: state.password,
@@ -76,7 +77,7 @@ class Login extends React.Component {
         if (this._inputIsValid(options.data)) {
             //memory leak?
             new Fingerprint2().get(function (result) {
-                options.data.browser = result;
+                options.headers.browser = result;
 
                 serviceManager.post(options).then(function (response) {
                     (response.success) ? self._handleAuthSuccess(response) : self._handleAuthFailure(response);
@@ -89,6 +90,7 @@ class Login extends React.Component {
         let self = this,
             state = this.context.store.getState().authReducer,
             options = {
+                headers: {},
                 data: {
                     username: state.username,
                     password: state.password
@@ -98,7 +100,7 @@ class Login extends React.Component {
 
         //memory leak?
         new Fingerprint2().get(function (result) {
-            options.data.browser = result;
+            options.headers.browser = result;
 
             serviceManager.post(options).then(function (response) {
                 (response.success) ? self._handleAuthSuccess(response) : self._handleAuthFailure(response);

@@ -8,7 +8,7 @@ const express = require('express'),
 const router = express.Router(),
     errorMessages = require('../errorMessages'),
     config = require('../config/database'),
-    messageSchema = require('../schema/message');
+    messageModel = require('../schema/message');
 
 router.get('/spoqn/messenger/open/:id', function (request, response) {
     let db = router.getDB(),
@@ -48,7 +48,7 @@ router.get('/spoqn/messenger/open/:id', function (request, response) {
                             timestamp: moment().unix() * 1000
                         };
 
-                    data.message = new messageSchema(messageObj);
+                    data.message = new messageModel(messageObj);
 
                     saveMessage(db, data, function () {
                         namespace.emit('new-message');

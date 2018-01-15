@@ -13,11 +13,12 @@ const express = require('express'),
     authenticationRouter = require('./server/routes/authentication'),
     conversationRouter = require('./server/routes/conversation'),
     friendsRouter = require('./server/routes/friends'),
-    messageSchema = require('./server/schema/message');
+    userRouter = require('./server/routes/user'),
+    conversationModel = require('./server/schema/conversation');
 
 const app = express(),
     router = express.Router(),
-    customRouters = [authenticationRouter, conversationRouter, friendsRouter],
+    customRouters = [authenticationRouter, conversationRouter, friendsRouter, userRouter],
     port = process.env.PORT || 3000, jwt = require('jsonwebtoken');
 
 var io;
@@ -37,6 +38,7 @@ mongoose.connect(config.database, {useMongoClient: true}).then(function () {
     app.use(authenticationRouter);
     app.use(conversationRouter);
     app.use(friendsRouter);
+    app.use(userRouter);
     app.use(router);
 
     io = socket.listen(app.listen(port, function () {
@@ -57,23 +59,22 @@ mongoose.connect(config.database, {useMongoClient: true}).then(function () {
     });
 
     namespace.on('connection', function (socket) {
-        socket.on('room', function(room) {
+        socket.on('room', function (room) {
             socket.join(room);
         });
 
-        socket.on('leave', function(room) {
+        socket.on('leave', function (room) {
             socket.leave(room);
         });
 
         socket.on('message', function (data) {
-            let user = socket.decoded,
-                messageObj = {
-                    author: user.username,
-                    text: data.message,
-                    timestamp: moment().unix() * 1000
-                };
+            let user = socket.decoded;
 
-            data.message = new messageSchema(messageObj);
+            data.message = conversationModel().model('message')({
+                author: user.username,
+                text: data.message,
+                timestamp: moment().unix() * 1000
+            });
 
             saveMessage(data, function () {
                 socket.in(data.room).emit('new-message');
@@ -103,10 +104,7 @@ for (let index = 0; index < customRouters.length; index++) {
 
 saveMessage = function (data, callback) {
     let ObjectId = mongoose.Types.ObjectId,
-        id = new ObjectId(data.room),
-        db = mongoose.connection;
+        id = new ObjectId(data.room);
 
-    db.collection('conversations').findOneAndUpdate({_id: id}, {$push: {messages: data.message}}, function (err, convosList) {
-        callback(err, convosList)
-    })
+    conversationModel.findOneAndUpdate({_id: id}, {$push: {messages: data.message}}, callback)
 };

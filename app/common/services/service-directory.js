@@ -21,5 +21,8 @@ export default {
     friend: {
         add: '/spoqn/friends/add',
         getAll: '/spoqn/friends'
+    },
+    user: {
+        update: '/spoqn/user/update'
     }
 }

@@ -10,7 +10,7 @@ const strategy = new CustomStrategy(
         let token = getToken(request.headers);
         if (token) {
             jwt.verify(token, config.secret, function (err, decoded) {
-                (err) ? done(err) : done(err, decoded.username);
+                (err) ? done(err) : done(err, decoded.username, decoded);
             });
         }
     }

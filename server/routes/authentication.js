@@ -71,7 +71,7 @@ router.get('/spoqn/refresh', function (request, response) {
 });
 
 router.post('/spoqn/register', function (request, response) {
-    if (request.body.email && request.body.username && request.body.password && request.body.browser) {
+    if (request.body.email && request.body.username && request.body.password && request.headers.browser) {
         let userData = {
                 email: request.body.email,
                 username: request.body.username,
@@ -91,7 +91,7 @@ router.post('/spoqn/register', function (request, response) {
             let token = jwt.sign({
                 username: request.body.username,
                 password: request.body.password,
-                browser: request.body.browser
+                browser: request.headers.browser
             }, config.secret, {
                 expiresIn: 3600 // in seconds
             });
@@ -104,7 +104,6 @@ router.post('/spoqn/register', function (request, response) {
                     telephone: user.telephone
                 },
                 msg: 'Registration successful. Welcome to spoqn.',
-                username: request.body.username,
                 token: 'Bearer ' + token
             });
         })
@@ -114,7 +113,7 @@ router.post('/spoqn/register', function (request, response) {
 });
 
 router.post('/spoqn/login', function (request, response) {
-    if (request.body.username && request.body.password && request.body.browser) {
+    if (request.body.username && request.body.password && request.headers.browser) {
         let db = router.getDB();
 
         db.collection('users').findOne({username: request.body.username}, function (err, result) {
@@ -126,7 +125,7 @@ router.post('/spoqn/login', function (request, response) {
                     let token = jwt.sign({
                         username: request.body.username,
                         password: request.body.password,
-                        browser: request.body.browser
+                        browser: request.headers.browser
                     }, config.secret, {
                         expiresIn: 3600 // in seconds
                     });
@@ -144,7 +143,7 @@ router.post('/spoqn/login', function (request, response) {
                 } else {
                     response.send({
                         success: false,
-                        msg: 'Authentication failed. Username or password is incorrect.'
+                        msg: 'Authentication failed. Your username or password is incorrect.'
                     });
                 }
             });

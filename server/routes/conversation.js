@@ -4,12 +4,12 @@ const express = require('express'),
     mongoose = require('mongoose');
 
 const router = express.Router(),
-    convoSchema = require('../schema/conversation'),
+    conversationModel = require('../schema/conversation'),
+    userModel = require('../schema/user'),
     errorMessages = require('../errorMessages');
 
 router.get('/spoqn/convo', function (request, response) {
-    let db = router.getDB(),
-        passport = router.getPassport();
+    let passport = router.getPassport();
 
     passport.authenticate('custom-jwt', function (err, loggedInUsername) {
         if (err) {
@@ -18,24 +18,30 @@ router.get('/spoqn/convo', function (request, response) {
                 msg: errorMessages["401"].message
             });
         }
-        db.collection('users').findOne({username: loggedInUsername}, function (err, creator) {
-            let ObjectId = mongoose.Types.ObjectId,
-                id = new ObjectId(creator._id);
+        userModel.findOne({username: loggedInUsername}, function (err, creator) {
+            if (err) {
+                return response.send({
+                    success: false,
+                    msg: 'We were unable to get your list of rooms.' +
+                    ' There was a problem accessing your profile.' +
+                    ' Please try again later.'
+                });
+            }
 
-            //$or: [{creator: id}, {members: creator.email}]
-            db.collection('conversations').find({members: {$eq: creator.email}}, {
-                    fields: {
-                        '_id': 1,
-                        'name': 1,
-                        'updatedAt': 1
-                    }
-                },
+            conversationModel.find({members: {$eq: creator.email}}, {'_id': 1, 'name': 1, 'updatedAt': 1},
                 function (err, convos) {
-                    convos.toArray(function (err, convosList) {
-                        response.json({
-                            success: true,
-                            rooms: convosList || [],
+                    if (err) {
+                        return response.send({
+                            success: false,
+                            msg: 'We were unable to get your list of rooms.' +
+                            ' There was a problem accessing your profile.' +
+                            ' Please try again later.'
                         });
+                    }
+
+                    response.json({
+                        success: true,
+                        rooms: convos || [],
                     });
                 });
         });
@@ -43,8 +49,7 @@ router.get('/spoqn/convo', function (request, response) {
 });
 
 router.post('/spoqn/convo/create', function (request, response) {
-    let db = router.getDB(),
-        passport = router.getPassport(),
+    let passport = router.getPassport(),
         convoObj = {
             messages: []
         };
@@ -57,35 +62,36 @@ router.post('/spoqn/convo/create', function (request, response) {
             });
         }
 
-        db.collection('users').findOne({username: loggedInUsername}, function (err, creator) {
+        userModel.findOne({username: loggedInUsername}, function (err, creator) {
             convoObj.creator = creator._id;
             convoObj.name = request.body.name;
             convoObj.members = [creator.email];
 
-            let convo = new convoSchema(convoObj);
+            let convo = new conversationModel(convoObj);
 
             convo.save(convoObj, (err) => {
                 if (err) {
                     return response.send({
                         success: false,
-                        msg: 'Failed to create ' + request.body.name +'. Please try again.'
+                        msg: 'Failed to create ' + request.body.name + '. Please try again.'
                     });
                 }
 
-                db.collection('conversations').find({creator: creator._id}, {
-                        fields: {
-                            '_id': 1,
-                            'name': 1,
-                            'updatedAt': 1
-                        }
-                    },
+                conversationModel.find({creator: creator._id}, {'_id': 1, 'name': 1, 'updatedAt': 1},
                     function (err, convos) {
-                        convos.toArray(function (err, convosList) {
-                            response.json({
-                                success: true,
-                                rooms: convosList,
-                                msg: request.body.name + ' has been created.'
+                        if (err) {
+                            return response.send({
+                                success: false,
+                                msg: request.body.name + ' has been created.' +
+                                ' But we were unable to get your new list of rooms.' +
+                                ' Please try again later.'
                             });
+                        }
+
+                        response.json({
+                            success: true,
+                            rooms: convos,
+                            msg: request.body.name + ' has been created.'
                         });
                     });
             });
@@ -95,8 +101,7 @@ router.post('/spoqn/convo/create', function (request, response) {
 });
 
 router.post('/spoqn/convo/members/add', function (request, response) {
-    let db = router.getDB(),
-        passport = router.getPassport();
+    let passport = router.getPassport();
 
     passport.authenticate('custom-jwt', function (err) {
         if (err) {
@@ -109,7 +114,7 @@ router.post('/spoqn/convo/members/add', function (request, response) {
         let ObjectId = mongoose.Types.ObjectId,
             id = new ObjectId(request.body.roomID);
 
-        db.collection('conversations').findOneAndUpdate({_id: id}, {$push: {members: request.body.member.email}}, function (err, result) {
+        conversationModel.findOneAndUpdate({_id: id}, {$push: {members: request.body.member.email}}, function (err, result) {
             if (err) {
                 return response.json({
                     success: true,
@@ -117,7 +122,7 @@ router.post('/spoqn/convo/members/add', function (request, response) {
                 });
             }
 
-            getMessages(db, {room: request.body.roomID}, function (err, convosList) {
+            getMessages({room: request.body.roomID}, function (err, convosList) {
                 response.json({
                     success: true,
                     members: (convosList[0] && convosList[0].members) || [],
@@ -130,8 +135,7 @@ router.post('/spoqn/convo/members/add', function (request, response) {
 });
 
 router.post('/spoqn/convo/members/remove', function (request, response) {
-    let db = router.getDB(),
-        passport = router.getPassport();
+    let passport = router.getPassport();
 
     passport.authenticate('custom-jwt', function (err) {
         if (err) {
@@ -144,7 +148,7 @@ router.post('/spoqn/convo/members/remove', function (request, response) {
         let ObjectId = mongoose.Types.ObjectId,
             id = new ObjectId(request.body.roomID);
 
-        db.collection('conversations').findOneAndUpdate({_id: id}, {$pull: {members: request.body.member.email}}, function (err, result) {
+        conversationModel.findOneAndUpdate({_id: id}, {$pull: {members: request.body.member.email}}, function (err, result) {
             if (err) {
                 return response.json({
                     success: true,
@@ -152,7 +156,7 @@ router.post('/spoqn/convo/members/remove', function (request, response) {
                 });
             }
 
-            getMessages(db, {room: request.body.roomID}, function (err, convosList) {
+            getMessages({room: request.body.roomID}, function (err, convosList) {
                 response.json({
                     success: true,
                     members: (convosList[0] && convosList[0].members) || [],
@@ -165,8 +169,7 @@ router.post('/spoqn/convo/members/remove', function (request, response) {
 });
 
 router.get('/spoqn/convo/members/:id', function (request, response) {
-    let db = router.getDB(),
-        passport = router.getPassport();
+    let passport = router.getPassport();
 
     passport.authenticate('custom-jwt', function (err) {
         if (err) {
@@ -176,7 +179,7 @@ router.get('/spoqn/convo/members/:id', function (request, response) {
             });
         }
 
-        getMessages(db, {room: request.params.id}, function (err, convosList) {
+        getMessages({room: request.params.id}, function (err, convosList) {
             response.json({
                 success: true,
                 members: (convosList[0] && convosList[0].members) || []
@@ -186,8 +189,7 @@ router.get('/spoqn/convo/members/:id', function (request, response) {
 });
 
 router.get('/spoqn/convo/messages/:id', function (request, response) {
-    let db = router.getDB(),
-        passport = router.getPassport();
+    let passport = router.getPassport();
 
     passport.authenticate('custom-jwt', function (err) {
         if (err) {
@@ -197,7 +199,7 @@ router.get('/spoqn/convo/messages/:id', function (request, response) {
             });
         }
 
-        getMessages(db, {room: request.params.id}, function (err, convosList) {
+        getMessages({room: request.params.id}, function (err, convosList) {
             response.json({
                 success: true,
                 messages: (convosList[0] && convosList[0].messages) || []
@@ -206,13 +208,11 @@ router.get('/spoqn/convo/messages/:id', function (request, response) {
     })(request, response);
 });
 
-getMessages = function (db, data, callback) {
+getMessages = function (data, callback) {
     let ObjectId = mongoose.Types.ObjectId,
         id = new ObjectId(data.room);
 
-    db.collection('conversations').find({_id: id}, function (err, convos) {
-        convos.toArray(callback);
-    });
+    conversationModel.find({_id: id}, callback);
 };
 
 module.exports = router;

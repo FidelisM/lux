@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const MessageSchema = new mongoose.Schema({
+const messageModel = new mongoose.Schema({
     text: {
         type: String,
         required: true,
@@ -17,4 +17,4 @@ const MessageSchema = new mongoose.Schema({
     }
 });
 
-module.exports = mongoose.model('Message', MessageSchema);
+module.exports = mongoose.model('message', messageModel);

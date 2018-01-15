@@ -97,7 +97,7 @@ class Greeter extends React.Component {
     }
 
     toggleDrawer() {
-        let prevState = this.context.store.getState().greeterReducer.drawerOpen;
+        let prevState = this.props.drawerOpen;
 
         this.props.dispatch({
             type: 'SET_DRAWER',
@@ -259,7 +259,10 @@ class Greeter extends React.Component {
     }
 
     _handleFetchSuccess(response) {
-        let container = document.getElementsByClassName('messenger')[0];
+        let container = document.getElementsByClassName('messenger')[0],
+        roomToRender = response.rooms.reduce(function(prev, curr) {
+            return prev.updatedAt < curr.updatedAt ? prev : curr;
+        });
 
         this.props.dispatch({
             type: 'SET_RM_LIST',
@@ -271,7 +274,7 @@ class Greeter extends React.Component {
         if (response.rooms.length) {
             ReactDOM.unmountComponentAtNode(container);
             ReactDOM.render(<Provider store={this.context.store}><MuiThemeProvider><Messenger
-                roomName={response.rooms[0].name} roomID={response.rooms[0]._id}
+                roomName={roomToRender.name} roomID={roomToRender._id}
                 socket={this.socket}/></MuiThemeProvider>
             </Provider>, container);
         }
@@ -580,12 +583,12 @@ class Greeter extends React.Component {
         return (
             <div className='greeter-component'>
                 <div className='app-bar'>
-                    <AppBar title={this.context.store.getState().greeterReducer.title} style={{height: '65px'}}
+                    <AppBar title={this.props.title} style={{height: '65px'}}
                             iconElementRight={
                                 <div>
                                     <GroupAddIcon style={groupAddIconStyles}
                                                   onClick={this.handleAddFriendClick.bind(this)}/>
-                                    <Logged label={this.context.store.getState().authReducer.username}
+                                    <Logged label={this.props.username}
                                             data-my-account={this.openMyAccount.bind(this)}
                                             data-logout={this.handleLogOut.bind(this)}
                                             data-help={this.handleHelp.bind(this)}/>
@@ -595,15 +598,15 @@ class Greeter extends React.Component {
                     </AppBar>
                 </div>
                 <div className='drawer'>
-                    <Drawer open={this.context.store.getState().greeterReducer.drawerOpen} width={350}
+                    <Drawer open={this.props.drawerOpen} width={350}
                             containerStyle={{height: 'calc(100% - 67px)', top: 66, left: 0}}>
                         <MenuItem onClick={this.handleCreateRoomClick.bind(this)} rightIcon={<AddIcon/>}>Create
                             Room</MenuItem>
                         <Divider/>
                         <Subheader>Conversations
-                            ({this.context.store.getState().greeterReducer.rooms.length})</Subheader>
+                            ({this.props.rooms.length})</Subheader>
                         <List>
-                            {this.context.store.getState().greeterReducer.rooms.map((room) =>
+                            {this.props.rooms.map((room) =>
                                 (<div key={room._id}>
                                     <ListItem onClick={this.openRoom.bind(this, room)}
                                               rightIcon={<ConversationMenu
@@ -666,6 +669,7 @@ Greeter.contextTypes = {
 
 function mapStateToProps(state) {
     return {
+        username: state.authReducer.username,
         title: state.greeterReducer.title,
         room: state.greeterReducer.room,
         rooms: state.greeterReducer.rooms,

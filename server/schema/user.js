@@ -24,6 +24,14 @@ const UserSchema = new mongoose.Schema({
     },
     friends: {
         type: [String]
+    },
+    image: {
+        data: {
+            type: Buffer
+        },
+        contentType: {
+            type: String
+        }
     }
 });
 
@@ -57,4 +65,4 @@ UserSchema.methods.comparePassword = function (passw, cb) {
     });
 };
 
-module.exports = mongoose.model('Users', UserSchema);
+module.exports = mongoose.model('users', UserSchema);

@@ -1,7 +1,6 @@
 .my-account-component {
-    width: 25%;
+    width: 30%;
     padding: 10px;
-    height: 550px;
 }
 
 .my-account-component .right {
@@ -21,9 +20,9 @@
 }
 
 .my-account-component .my-account-view {
-    overflow: auto;
+    overflow: hidden;
     margin: 10px;
-    height: 575px;
+    padding: 10px 10px 0 10px;
 }
 
 .my-account-component .my-account-view .avatar-actions {
@@ -63,4 +62,9 @@
     height: inherit;
     object-fit: cover;
     border-radius: 50%;
+}
+
+.my-account-component .my-account-actions {
+    display: grid;
+    grid-template-columns: 60% 40%;
 }

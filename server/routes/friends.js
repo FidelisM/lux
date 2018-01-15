@@ -4,11 +4,11 @@ const express = require('express'),
     nodemailer = require('nodemailer');
 
 const router = express.Router(),
-    errorMessages = require('../errorMessages');
+    errorMessages = require('../errorMessages'),
+    userModel = require('../schema/user');
 
 router.get('/spoqn/friends', function (request, response) {
-    let db = router.getDB(),
-        passport = router.getPassport();
+    let passport = router.getPassport();
 
     passport.authenticate('custom-jwt', function (err, loggedInUsername) {
         if (err) {
@@ -18,32 +18,29 @@ router.get('/spoqn/friends', function (request, response) {
             });
         }
 
-        getFriends(db, loggedInUsername, function (user) {
-            db.collection('users').find({
-                'email': {
-                    $in: user.friends
-                }
-            }, {
-                fields: {
-                    '_id': 1,
-                    'username': 1,
-                    'email': 1
-                }
-            }, function (err, friends) {
-                friends.toArray(function (err, friendsArray) {
+        getFriends(loggedInUsername, function (err, user) {
+            if (err) {
+                return response.send({
+                    success: false,
+                    msg: 'We were unable to get your friend list.' +
+                    ' There was a problem accessing your profile.' +
+                    ' Please try again later.'
+                });
+            }
+
+            userModel.find({'email': {$in: user.friends}}, {'_id': 1, 'username': 1, 'email': 1},
+                function (err, friends) {
                     return response.json({
                         success: true,
-                        friends: friendsArray
+                        friends: friends
                     });
-                })
-            });
+                });
         });
     })(request, response);
 });
 
 router.post('/spoqn/friends/add', function (request, response) {
-    let db = router.getDB(),
-        passport = router.getPassport();
+    let passport = router.getPassport();
 
     passport.authenticate('custom-jwt', function (err, loggedInUsername) {
         if (err) {
@@ -53,15 +50,15 @@ router.post('/spoqn/friends/add', function (request, response) {
             });
         }
 
-        db.collection('users').findOneAndUpdate({username: loggedInUsername}, {$push: {friends: request.body.friend}},
+        userModel.findOneAndUpdate({username: loggedInUsername}, {$push: {friends: request.body.friend}},
             {new: true}, function (err, result) {
                 let user = result.value;
 
                 if (err) {
                     return response.send({
                         success: false,
-                        msg: 'There was a problem with your request. We were unable to add' + request.body.friend +
-                        ' to your friend list. Please try again.'
+                        msg: 'We were unable to add' + request.body.friend +
+                        ' to your friend list. There was a problem accessing your profile. Please try again later.'
                     });
                 }
 
@@ -86,8 +83,7 @@ router.post('/spoqn/friends/add', function (request, response) {
 });
 
 router.post('/spoqn/friends/email', function (request, response) {
-    let db = router.getDB(),
-        passport = router.getPassport();
+    let passport = router.getPassport();
 
     passport.authenticate('custom-jwt', function (err, loggedInUsername) {
         if (err) {
@@ -97,11 +93,11 @@ router.post('/spoqn/friends/email', function (request, response) {
             });
         }
 
-        db.collection('users').find({username: loggedInUsername}, function (err, user) {
+        userModel.find({username: loggedInUsername}, function (err, user) {
             if (err) {
                 return response.send({
                     success: false,
-                    msg: 'We were unable to find your profile.'
+                    msg: 'There was a problem accessing your profile. Please try again later.'
                 });
             }
 
@@ -124,10 +120,8 @@ router.post('/spoqn/friends/email', function (request, response) {
     })(request, response);
 });
 
-getFriends = function (db, loggedInUsername, callback) {
-    db.collection('users').findOne({username: loggedInUsername}, function (err, user) {
-        callback(user);
-    });
+getFriends = function (loggedInUsername, callback) {
+    userModel.findOne({username: loggedInUsername}, callback);
 };
 
 sendEmailInvite = function (email, sender, callback) {

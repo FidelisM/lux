@@ -7,6 +7,7 @@
     position: relative;
     display: flex;
     justify-content: center;
+    align-items: flex-start
 }
 
 .greeter-component .my-account {
@@ -14,6 +15,7 @@
     position: relative;
     display: none;
     justify-content: center;
+    align-items: flex-start
 }
 
 .alert-overlay-content.edit-friends {
