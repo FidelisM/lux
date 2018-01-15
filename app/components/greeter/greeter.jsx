@@ -91,6 +91,10 @@ class Greeter extends React.Component {
         let token = localStorage.getItem('token'),
             socketURL = '/spoqn/messenger/chat';
 
+        if(this.socket){
+            this.socket.close();
+        }
+
         this.socket = io(socketURL, {
             query: 'token=' + token
         });
@@ -239,7 +243,7 @@ class Greeter extends React.Component {
         ReactDOM.unmountComponentAtNode(document.getElementsByClassName('messenger')[0]);
         ReactDOM.unmountComponentAtNode(container);
 
-        ReactDOM.render(<Provider store={this.context.store}><MuiThemeProvider><Account/></MuiThemeProvider>
+        ReactDOM.render(<Provider store={this.context.store}><MuiThemeProvider><Account initializeSocket={this._initializeSocket.bind(this)}/></MuiThemeProvider>
         </Provider>, container);
     }
 

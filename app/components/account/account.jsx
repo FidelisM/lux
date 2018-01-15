@@ -85,6 +85,8 @@ class Account extends React.Component {
             email: state.email,
             telephone: this.state.initialTelephone
         });
+
+        this.props.initializeSocket();
     }
 
     _loadImage() {

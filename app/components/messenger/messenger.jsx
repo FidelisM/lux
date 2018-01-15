@@ -125,7 +125,7 @@ class Messenger extends React.Component {
                         <Divider/>
                         <div className="messenger-view" id="messenger-view">
                             <Message messages={this.props.messages}
-                                     username={this.context.store.getState().authReducer.username}/>
+                                     username={this.props.username}/>
                         </div>
                         <div className={"messenger-author"}>
                             <div className="message-author-content">
@@ -159,7 +159,8 @@ Messenger.contextTypes = {
 function mapStateToProps(state) {
     return {
         newMessage: state.messengerReducer.newMessage,
-        messages: state.messengerReducer.messages
+        messages: state.messengerReducer.messages,
+        username: state.authReducer.username
     };
 }
 
