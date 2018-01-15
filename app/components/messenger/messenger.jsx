@@ -124,7 +124,7 @@ class Messenger extends React.Component {
                         </div>
                         <Divider/>
                         <div className="messenger-view" id="messenger-view">
-                            <Message messages={this.props.messages}
+                            <Message messages={this.props.messages} members={this.props.members}
                                      username={this.props.username}/>
                         </div>
                         <div className={"messenger-author"}>

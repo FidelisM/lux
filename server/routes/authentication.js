@@ -1,7 +1,7 @@
 /*global require*/
 
 const express = require('express'),
-    userSchema = require('../schema/user'),
+    userModel = require('../schema/user'),
     config = require('../config/database'),
     jwt = require('jsonwebtoken');
 
@@ -9,8 +9,7 @@ const router = express.Router();
 
 router.get('/spoqn/refresh', function (request, response) {
     let token = getToken(request.headers),
-        browser = request.headers.browser,
-        db = router.getDB();
+        browser = request.headers.browser;
 
     if (token) {
         jwt.verify(token, config.secret, handleSuccess);
@@ -30,13 +29,14 @@ router.get('/spoqn/refresh', function (request, response) {
         }
 
         if ((decoded.username && decoded.password) && (decoded.browser === browser)) {
-            db.collection('users').findOne({username: decoded.username}, function (err, result) {
-                let user = new userSchema(result);
+            userModel.findOne({username: decoded.username}, function (err, result) {
+                let user = new userModel(result);
 
                 user.comparePassword(decoded.password, function (err, isMatch) {
                     if (isMatch && !err) {
                         let token = jwt.sign({
                             username: decoded.username,
+                            email: decoded.email,
                             password: decoded.password,
                             browser: decoded.browser
                         }, config.secret, {
@@ -78,7 +78,7 @@ router.post('/spoqn/register', function (request, response) {
                 password: request.body.password,
                 telephone: request.body.telephone
             },
-            user = new userSchema(userData);
+            user = new userModel(userData);
 
         user.save(userData, (err) => {
             if (err) {
@@ -90,6 +90,7 @@ router.post('/spoqn/register', function (request, response) {
 
             let token = jwt.sign({
                 username: request.body.username,
+                email: request.body.email,
                 password: request.body.password,
                 browser: request.headers.browser
             }, config.secret, {
@@ -114,10 +115,8 @@ router.post('/spoqn/register', function (request, response) {
 
 router.post('/spoqn/login', function (request, response) {
     if (request.body.username && request.body.password && request.headers.browser) {
-        let db = router.getDB();
-
-        db.collection('users').findOne({username: request.body.username}, function (err, result) {
-            let user = new userSchema(result);
+        userModel.findOne({username: request.body.username}, function (err, result) {
+            let user = new userModel(result);
 
             user.comparePassword(request.body.password, function (err, isMatch) {
                 if (isMatch && !err) {
@@ -125,6 +124,7 @@ router.post('/spoqn/login', function (request, response) {
                     let token = jwt.sign({
                         username: request.body.username,
                         password: request.body.password,
+                        email: user.email,
                         browser: request.headers.browser
                     }, config.secret, {
                         expiresIn: 3600 // in seconds

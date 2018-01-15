@@ -14,14 +14,16 @@ const express = require('express'),
     conversationRouter = require('./server/routes/conversation'),
     friendsRouter = require('./server/routes/friends'),
     userRouter = require('./server/routes/user'),
-    conversationModel = require('./server/schema/conversation');
+    conversationModel = require('./server/schema/conversation'),
+    messageSchema = require('./server/schema/message'),
+    messageModel = mongoose.model('message', messageSchema);
 
 const app = express(),
     router = express.Router(),
     customRouters = [authenticationRouter, conversationRouter, friendsRouter, userRouter],
     port = process.env.PORT || 3000, jwt = require('jsonwebtoken');
 
-var io;
+let io;
 
 router.use(express.static('dist'));
 passport.use('custom-jwt', strategy);
@@ -70,8 +72,9 @@ mongoose.connect(config.database, {useMongoClient: true}).then(function () {
         socket.on('message', function (data) {
             let user = socket.decoded;
 
-            data.message = conversationModel().model('message')({
+            data.message = messageModel({
                 author: user.username,
+                authorEmail: user.email,
                 text: data.message,
                 timestamp: moment().unix() * 1000
             });

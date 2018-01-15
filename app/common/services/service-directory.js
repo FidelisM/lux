@@ -23,6 +23,9 @@ export default {
         getAll: '/spoqn/friends'
     },
     user: {
-        update: '/spoqn/user/update'
+        update: '/spoqn/user/update',
+        image: '/spoqn/user/update/image',
+        getMyImage: '/spoqn/user/image',
+        getImagebyEmail: '/spoqn/user/image/:email'
     }
 }

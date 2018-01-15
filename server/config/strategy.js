@@ -12,6 +12,8 @@ const strategy = new CustomStrategy(
             jwt.verify(token, config.secret, function (err, decoded) {
                 (err) ? done(err) : done(err, decoded.username, decoded);
             });
+        } else {
+            done(true);
         }
     }
 );

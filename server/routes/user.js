@@ -1,4 +1,6 @@
 /*global require*/
+const fs = require('fs'),
+    multer = require('multer');
 
 const express = require('express'),
     userModel = require('../schema/user'),
@@ -6,7 +8,8 @@ const express = require('express'),
     errorMessages = require('../errorMessages'),
     jwt = require('jsonwebtoken');
 
-const router = express.Router();
+const router = express.Router(),
+    upload = multer({dest: 'uploads/'});
 
 
 router.post('/spoqn/user/update', function (request, response) {
@@ -52,6 +55,76 @@ router.post('/spoqn/user/update', function (request, response) {
     })(request, response);
 });
 
+router.post('/spoqn/user/update/image', upload.single('image'), function (request, response) {
+    let passport = router.getPassport(),
+        updates = {};
+
+    passport.authenticate('custom-jwt', function (err, loggedInUsername, user) {
+        if (err) {
+            return response.status(401).send({
+                success: false,
+                msg: errorMessages["401"].message
+            });
+        }
+
+        updates.image = {};
+        updates.image.data = fs.readFileSync(request.file.path);
+        updates.image.mime = request.file.mimetype;
+
+        updateUser(user.username, updates, request, response);
+    })(request, response);
+});
+
+router.get('/spoqn/user/image/:email', function (request, response) {
+    let passport = router.getPassport();
+
+    passport.authenticate('custom-jwt', function (err) {
+        if (err) {
+            return response.status(401).send({
+                success: false,
+                msg: errorMessages["401"].message
+            });
+        }
+
+        userModel.findOne({'email': request.params.email}, {image: 1}, (err, user) => {
+            if (user.image && user.image.mime) {
+                response.setHeader('content-type', user.image.mime);
+                return response.send(user.image.data);
+            }
+
+            return response.status(404).send({
+                success: false,
+                msg: 'Image Not Found'
+            });
+        });
+    })(request, response);
+});
+
+router.get('/spoqn/user/image', function (request, response) {
+    let passport = router.getPassport();
+
+    passport.authenticate('custom-jwt', function (err, loggedInUsername) {
+        if (err) {
+            return response.status(401).send({
+                success: false,
+                msg: errorMessages["401"].message
+            });
+        }
+
+        userModel.findOne({'username': loggedInUsername}, {image: 1}, (err, user) => {
+            if (user.image && user.image.mime) {
+                response.setHeader('content-type', user.image.mime);
+                return response.send(user.image.data);
+            }
+
+            return response.status(404).send({
+                success: false,
+                msg: 'Image Not Found'
+            });
+        });
+    })(request, response);
+});
+
 const updateUser = function (username, updates, request, response) {
     userModel.findOne({'username': username}, (err, user) => {
         user = Object.assign(user, updates);
@@ -73,6 +146,7 @@ const updateUser = function (username, updates, request, response) {
 const issueNewToken = function (request, response, user) {
     let token = jwt.sign({
         username: user.username,
+        email: user.email,
         password: request.body.currentPassword,
         browser: request.headers.browser
     }, config.secret, {

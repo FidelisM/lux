@@ -91,7 +91,7 @@ class Greeter extends React.Component {
         let token = localStorage.getItem('token'),
             socketURL = '/spoqn/messenger/chat';
 
-        if(this.socket){
+        if (this.socket) {
             this.socket.close();
         }
 
@@ -164,7 +164,7 @@ class Greeter extends React.Component {
                 url: services.room.create
             };
 
-        if (!state.room) {
+        if (state.room) {
             serviceManager.post(options).then(function (response) {
                 (response.success) ? self._handleCreateSuccess(response) : self._handleCreateFailure(response);
             }).catch(self._handleCreateFailure.bind(self));
@@ -215,7 +215,8 @@ class Greeter extends React.Component {
     }
 
     openRoom(room) {
-        let container = document.getElementsByClassName('messenger')[0],
+        let self = this,
+            container = document.getElementsByClassName('messenger')[0],
             myAccountContainer = document.getElementsByClassName('my-account')[0];
 
         this.socket.removeAllListeners();
@@ -226,9 +227,11 @@ class Greeter extends React.Component {
         ReactDOM.unmountComponentAtNode(myAccountContainer);
         ReactDOM.unmountComponentAtNode(container);
 
-        ReactDOM.render(<Provider store={this.context.store}><MuiThemeProvider><Messenger
-            roomName={room.name} roomID={room._id} socket={this.socket}/></MuiThemeProvider>
-        </Provider>, container);
+        this.getMembers(room._id).then(function (resp) {
+            ReactDOM.render(<Provider store={self.context.store}><MuiThemeProvider><Messenger
+                roomName={room.name} roomID={room._id} socket={self.socket} members={resp.members}/></MuiThemeProvider>
+            </Provider>, container);
+        });
     }
 
     openMyAccount() {
@@ -243,7 +246,8 @@ class Greeter extends React.Component {
         ReactDOM.unmountComponentAtNode(document.getElementsByClassName('messenger')[0]);
         ReactDOM.unmountComponentAtNode(container);
 
-        ReactDOM.render(<Provider store={this.context.store}><MuiThemeProvider><Account initializeSocket={this._initializeSocket.bind(this)}/></MuiThemeProvider>
+        ReactDOM.render(<Provider store={this.context.store}><MuiThemeProvider><Account
+            initializeSocket={this._initializeSocket.bind(this)}/></MuiThemeProvider>
         </Provider>, container);
     }
 
@@ -263,25 +267,28 @@ class Greeter extends React.Component {
     }
 
     _handleFetchSuccess(response) {
-        let container = document.getElementsByClassName('messenger')[0],
-        roomToRender = response.rooms.reduce(function(prev, curr) {
-            return prev.updatedAt < curr.updatedAt ? prev : curr;
-        });
+        let self = this,
+            container = document.getElementsByClassName('messenger')[0],
+            roomToRender = response.rooms.reduce(function (prev, curr) {
+                return prev.updatedAt < curr.updatedAt ? prev : curr;
+            });
 
-        this.props.dispatch({
+        self.props.dispatch({
             type: 'SET_RM_LIST',
             rooms: response.rooms
         });
 
-        this.socket.removeAllListeners();
+        self.socket.removeAllListeners();
 
-        if (response.rooms.length) {
-            ReactDOM.unmountComponentAtNode(container);
-            ReactDOM.render(<Provider store={this.context.store}><MuiThemeProvider><Messenger
-                roomName={roomToRender.name} roomID={roomToRender._id}
-                socket={this.socket}/></MuiThemeProvider>
-            </Provider>, container);
-        }
+        self.getMembers(roomToRender._id).then(function (resp) {
+            if (response.rooms.length) {
+                ReactDOM.unmountComponentAtNode(container);
+                ReactDOM.render(<Provider store={self.context.store}><MuiThemeProvider><Messenger
+                    roomName={roomToRender.name} roomID={roomToRender._id} members={resp.members}
+                    socket={self.socket}/></MuiThemeProvider>
+                </Provider>, container);
+            }
+        });
     }
 
     _handleFetchFailure(response) {

@@ -35,7 +35,9 @@ class Account extends React.Component {
             currentPasswordErrorText: '',
             saveDisabled: true,
             initialUsername: this.props.username,
-            initialTelephone: this.props.telephone
+            initialTelephone: this.props.telephone,
+            image: {},
+            isFileSelected: false
         }
     }
 
@@ -90,9 +92,12 @@ class Account extends React.Component {
     }
 
     _loadImage() {
-        fetch('https://www.themarysue.com/wp-content/uploads/2015/12/avatar.jpeg', {
-            mode: 'no-cors'
-        }).then(function (response) {
+        let token = localStorage.getItem('token'),
+            headers = {
+                Authorization: token
+            };
+
+        fetch(services.user.getMyImage, {headers: new Headers(headers)}).then(function (response) {
             return response.blob();
         }).then(function (imgBlob) {
             let image = document.querySelector('#image-canvas');
@@ -102,9 +107,12 @@ class Account extends React.Component {
 
     handleSave() {
         let self = this,
+            token = localStorage.getItem('token'),
             state = this.context.store.getState().authReducer,
             options = {
-                headers: {},
+                headers: {
+                    Authorization: token
+                },
                 data: {
                     username: state.username,
                     password: state.password,
@@ -115,6 +123,11 @@ class Account extends React.Component {
                 url: services.user.update
             };
 
+        if (self.state.image.name) {
+            self._handleImageUpload();
+            return;
+        }
+
         if (this._inputIsValid(options.data)) {
             new Fingerprint2().get(function (result) {
                 options.headers.browser = result;
@@ -124,6 +137,49 @@ class Account extends React.Component {
                 }).catch(self._handleSaveFailure.bind(self));
             });
         }
+    }
+
+    _handleImageUpload() {
+        let self = this,
+            token = localStorage.getItem('token'),
+            formData = new FormData(),
+            options = {
+                headers: {
+                    Authorization: token
+                },
+                url: services.user.image,
+                ignoreDefaultHeaders: true,
+                ignoreStringify: true
+            };
+
+        formData.append('image', self.state.image);
+        options.data = formData;
+
+        new Fingerprint2().get(function (result) {
+            options.headers.browser = result;
+
+            serviceManager.post(options).then(function (response) {
+                (response.success) ? self._handleImageUploadSuccess(response) : self._handleImageUploadFailure(response);
+            }).catch(self._handleImageUploadFailure.bind(self));
+        });
+    }
+
+    _handleImageUploadSuccess(response) {
+        this._loadImage();
+        this._handleSaveSuccess(response);
+    }
+
+    _handleImageUploadFailure() {
+    }
+
+    handleFileSelection(evt) {
+        this.setState({
+            image: evt.target.files[0],
+            isFileSelected: true
+        });
+
+        let image = document.querySelector('#image-canvas');
+        image.src = window.URL.createObjectURL(evt.target.files[0]);
     }
 
     _handleSaveSuccess(response) {
@@ -259,7 +315,10 @@ class Account extends React.Component {
                                     <RaisedButton icon={<PhotoIcon/>}
                                                   onClick={this.openCamera.bind(this)}/>
                                     <RaisedButton icon={<UploadIcon/>} style={{marginLeft: 20}}
-                                                  onClick={this.handleSave.bind(this)}/>
+                                                  containerElement='label' primary={this.state.isFileSelected}>
+                                        <input type="file" style={{display: 'none'}}
+                                               onChange={this.handleFileSelection.bind(this)}/>
+                                    </RaisedButton>
                                 </div>
                             </div>
                             <div className="text-fields">
@@ -295,6 +354,7 @@ class Account extends React.Component {
                                 <TextField type="password" floatingLabelText="Current Password"
                                            className="my-account-curr-password"
                                            data-action="CURR_PASSWORD" data-field="currentPassword"
+                                           value={this.props.currentPassword}
                                            onChange={this.handleInputChange.bind(this)} errorStyle={{color: pinkA200}}
                                            style={{height: 50, marginLeft: 10}} underlineStyle={{borderColor: pinkA200}}
                                            underlineFocusStyle={{borderColor: pinkA200}} fullWidth={true}

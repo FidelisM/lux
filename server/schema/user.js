@@ -29,7 +29,7 @@ const UserSchema = new mongoose.Schema({
         data: {
             type: Buffer
         },
-        contentType: {
+        mime: {
             type: String
         }
     }

@@ -4,7 +4,7 @@ const mongoose = require('mongoose'),
 
 const ConversationSchema = new mongoose.Schema({
     messages: {
-        type: [messageModel.Schema]
+        type: [messageModel]
     },
     creator: {
         type: mongoose.Schema.Types.ObjectId,

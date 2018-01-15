@@ -117,8 +117,8 @@ router.post('/spoqn/convo/members/add', function (request, response) {
         conversationModel.findOneAndUpdate({_id: id}, {$push: {members: request.body.member.email}}, function (err, result) {
             if (err) {
                 return response.json({
-                    success: true,
-                    msg: 'We were unable add ' + request.body.member.email + ' to ' + result.value.name + '. Please try again later.'
+                    success: false,
+                    msg: 'We were unable add ' + request.body.member.email + ' to ' + result.name + '. Please try again later.'
                 });
             }
 
@@ -126,7 +126,7 @@ router.post('/spoqn/convo/members/add', function (request, response) {
                 response.json({
                     success: true,
                     members: (convosList[0] && convosList[0].members) || [],
-                    msg: request.body.member.email + ' has been added to ' + result.value.name + '.'
+                    msg: request.body.member.email + ' has been added to ' + result.name + '.'
                 });
             });
         })
@@ -151,7 +151,7 @@ router.post('/spoqn/convo/members/remove', function (request, response) {
         conversationModel.findOneAndUpdate({_id: id}, {$pull: {members: request.body.member.email}}, function (err, result) {
             if (err) {
                 return response.json({
-                    success: true,
+                    success: false,
                     msg: 'We were unable to remove ' + request.body.member.email + ' from ' + result.value.name + '. Please try again later.'
                 });
             }

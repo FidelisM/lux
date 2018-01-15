@@ -4,10 +4,36 @@ import moment from 'moment';
 import Divider from 'material-ui/Divider';
 
 import './message.css';
+import services from "Services";
 
 export default class Message extends React.Component {
     constructor(props) {
         super(props);
+    }
+
+    componentDidUpdate() {
+        this._getImages();
+    }
+
+    _getImages() {
+        let self = this,
+            token = localStorage.getItem('token'),
+            headers = {
+                Authorization: token
+            };
+
+        for (let i = 0; i < this.props.members.length; i++) {
+            fetch(services.user.getImagebyEmail.replace(':email', self.props.members[i]), {headers: new Headers(headers)}).then(function (response) {
+                return response.blob();
+            }).then(function (imgBlob) {
+                let images = document.querySelectorAll('[data-author="' + self.props.members[i] + '"]');
+
+                [].forEach.call(images, function (image) {
+                        image.src = window.URL.createObjectURL(imgBlob);
+                    }
+                );
+            });
+        }
     }
 
     render() {
@@ -34,9 +60,8 @@ export default class Message extends React.Component {
                                     </div>
                                     <div className={"chat-head inline-block right"}>
                                          <span className="chat-img">
-                                                <img
-                                                    src="https://www.themarysue.com/wp-content/uploads/2015/12/avatar.jpeg"
-                                                    className="img-circle user-avatar"/>
+                                               <img className={"img-circle user-avatar"}
+                                                    data-author={message.authorEmail}/>
                                          </span>
                                     </div>
                                 </div>
@@ -47,8 +72,8 @@ export default class Message extends React.Component {
                             <div className="chat-content" key={index}>
                                 <div className={"chat-head inline-block"}>
                                      <span className="chat-img">
-                                            <img src="https://www.themarysue.com/wp-content/uploads/2015/12/avatar.jpeg"
-                                                 className="img-circle user-avatar"/>
+                                            <img className={"img-circle user-avatar"}
+                                                 data-author={message.authorEmail}/>
                                      </span>
                                 </div>
                                 <div className="chat-body inline-block">
