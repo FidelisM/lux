@@ -10,6 +10,7 @@ module.exports = {
     resolve: {
         alias: {
             Components: path.resolve(__dirname, './app/components'),
+            Images: path.resolve(__dirname, './app/images'),
             Widgets: path.resolve(__dirname, './app/widgets'),
             Vendor: path.resolve(__dirname, './app/vendor'),
             Services: path.resolve(__dirname, './app/common/services/service-directory'),

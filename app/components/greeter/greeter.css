@@ -18,8 +18,17 @@
     align-items: flex-start
 }
 
-.alert-overlay-content.edit-friends {
+.alert-overlay-content.edit-friends .friend-cards-content {
     display: inline-grid;
     grid-template-columns: 50% 50%;
     margin-left: 35px;
+    margin-top: 10px;
+}
+
+.alert-overlay-content.edit-friends .friend-cards-notification {
+    margin-top: 20px;
+}
+
+.alert-overlay-content.edit-friends .friend-cards-notification .info-text {
+    font-weight: bold;
 }

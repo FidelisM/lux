@@ -51,9 +51,7 @@ router.post('/spoqn/friends/add', function (request, response) {
         }
 
         userModel.findOneAndUpdate({username: loggedInUsername}, {$push: {friends: request.body.friend}},
-            {new: true}, function (err, result) {
-                let user = result.value;
-
+            {new: true}, function (err, user) {
                 if (err) {
                     return response.send({
                         success: false,

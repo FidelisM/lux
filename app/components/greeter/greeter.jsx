@@ -268,27 +268,40 @@ class Greeter extends React.Component {
 
     _handleFetchSuccess(response) {
         let self = this,
-            container = document.getElementsByClassName('messenger')[0],
+            snackbarEl = document.querySelector('#snackbar'),
+            container = document.querySelector('.messenger'),
+            roomToRender;
+
+        if (response.rooms.length) {
             roomToRender = response.rooms.reduce(function (prev, curr) {
                 return prev.updatedAt < curr.updatedAt ? prev : curr;
             });
 
-        self.props.dispatch({
-            type: 'SET_RM_LIST',
-            rooms: response.rooms
-        });
+            self.props.dispatch({
+                type: 'SET_RM_LIST',
+                rooms: response.rooms
+            });
 
-        self.socket.removeAllListeners();
+            self.socket.removeAllListeners();
 
-        self.getMembers(roomToRender._id).then(function (resp) {
-            if (response.rooms.length) {
+            self.getMembers(roomToRender._id).then(function (resp) {
                 ReactDOM.unmountComponentAtNode(container);
                 ReactDOM.render(<Provider store={self.context.store}><MuiThemeProvider><Messenger
                     roomName={roomToRender.name} roomID={roomToRender._id} members={resp.members}
                     socket={self.socket}/></MuiThemeProvider>
                 </Provider>, container);
-            }
-        });
+
+                ReactDOM.render(<Notification open={true} message={roomToRender.name + ' opened.'}/>, snackbarEl);
+            });
+        } else {
+            ReactDOM.render(<Notification open={true} message={'Create a room.'}/>, snackbarEl);
+
+            self.props.dispatch({
+                type: 'SET_DRAWER',
+                drawerOpen: true
+            });
+
+        }
     }
 
     _handleFetchFailure(response) {
@@ -405,18 +418,29 @@ class Greeter extends React.Component {
             members,
             friends,
             container = document.getElementById('overlay'),
-            content = (friends) => {
-                return (
-                    friends.map(function (friend) {
-                        return <FriendCard username={friend.username} email={friend.email} key={friend._id}
-                                           handleAdd={self.addMember.bind(self, friend, roomID)}
-                                           handleRemove={self.removeMember.bind(self, friend, roomID)}
-                                           friends={friends} members={members}
-                        />
-                    })
-                )
-            },
-            closeCB = () => {
+            props = {
+                content: () => {
+                    return (
+                        <div>
+                            <div className="header">
+                                <div className="header-label">
+                                    <Subheader>Friends:</Subheader>
+                                </div>
+                                <Divider/>
+                            </div>
+                            <div className={(friends.length) ? "friend-cards-content" : "friend-cards-notification"}>
+                                {(friends.length) ? friends.map(function (friend) {
+                                    return <FriendCard username={friend.username} email={friend.email} key={friend._id}
+                                                       handleAdd={self.addMember.bind(self, friend, roomID)}
+                                                       handleRemove={self.removeMember.bind(self, friend, roomID)}
+                                                       friends={friends} members={members}/>
+                                }) : <div className="info-text">Add some friends and they'll show up here.</div>}
+                            </div>
+                        </div>
+                    )
+                },
+                closeCB: () => {
+                }
             };
 
         this.getMembers(roomID).then(function (response) {
@@ -426,8 +450,7 @@ class Greeter extends React.Component {
                 friends = response.friends;
 
                 ReactDOM.unmountComponentAtNode(container);
-                ReactDOM.render(<AlertDialog title={'Edit ' + roomName + ' Members'} content={content(friends)}
-                                             closeCB={closeCB.bind(self)} style={{minWidth: 400}}
+                ReactDOM.render(<AlertDialog {...props} title={'Edit ' + roomName + ' Members'} style={{minWidth: 400}}
                                              label="Done" customClass={'edit-friends'}/>, container);
             });
         });
@@ -597,7 +620,7 @@ class Greeter extends React.Component {
                     <AppBar title={this.props.title} style={{height: '65px'}}
                             iconElementRight={
                                 <div>
-                                    <GroupAddIcon style={groupAddIconStyles}
+                                    <GroupAddIcon style={groupAddIconStyles} title="Delete"
                                                   onClick={this.handleAddFriendClick.bind(this)}/>
                                     <Logged label={this.props.username}
                                             data-my-account={this.openMyAccount.bind(this)}

@@ -91,7 +91,7 @@ router.post('/spoqn/convo/create', function (request, response) {
                         response.json({
                             success: true,
                             rooms: convos,
-                            msg: request.body.name + ' has been created.'
+                            msg: request.body.name + ' has been created. Go ahead and add some members.'
                         });
                     });
             });
@@ -148,11 +148,11 @@ router.post('/spoqn/convo/members/remove', function (request, response) {
         let ObjectId = mongoose.Types.ObjectId,
             id = new ObjectId(request.body.roomID);
 
-        conversationModel.findOneAndUpdate({_id: id}, {$pull: {members: request.body.member.email}}, function (err, result) {
+        conversationModel.findOneAndUpdate({_id: id}, {$pull: {members: request.body.member.email}}, function (err, conversation) {
             if (err) {
                 return response.json({
                     success: false,
-                    msg: 'We were unable to remove ' + request.body.member.email + ' from ' + result.value.name + '. Please try again later.'
+                    msg: 'We were unable to remove ' + request.body.member.email + ' from ' + conversation.name + '. Please try again later.'
                 });
             }
 
@@ -160,7 +160,7 @@ router.post('/spoqn/convo/members/remove', function (request, response) {
                 response.json({
                     success: true,
                     members: (convosList[0] && convosList[0].members) || [],
-                    msg: request.body.member.email + ' has been removed from ' + result.value.name + '.'
+                    msg: request.body.member.email + ' has been removed from ' + conversation.name + '.'
                 });
             });
         })

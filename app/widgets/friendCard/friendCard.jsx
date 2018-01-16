@@ -4,6 +4,8 @@ import FlatButton from 'material-ui/FlatButton';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 
 import './friendCard.css'
+import 'Images/default.jpg'
+import services from "Services";
 
 export default class FriendCard extends React.Component {
     constructor(props) {
@@ -11,7 +13,34 @@ export default class FriendCard extends React.Component {
 
         this.state = {
             members: this.props.members,
+            image: this.props.image
         }
+    }
+
+    componentDidMount() {
+        this._getImage();
+    }
+
+    _getImage() {
+        let self = this,
+            token = localStorage.getItem('token'),
+            headers = {
+                Authorization: token
+            };
+
+        fetch(services.user.getImagebyEmail.replace(':email', this.props.email), {headers: new Headers(headers)}).then(function (response) {
+            return response.blob();
+        }).then(function (imgBlob) {
+            if(/image/.test(imgBlob.type)){
+                self.setState({
+                    image: window.URL.createObjectURL(imgBlob)
+                })
+            } else{
+                self.setState({
+                    image: './default.jpg'
+                })
+            }
+        });
     }
 
     handleRemove() {
@@ -56,7 +85,8 @@ export default class FriendCard extends React.Component {
                     <Card style={{width: 300}}>
                         <CardHeader title={this.props.username} subtitle={this.props.email} style={{objectFit: 'cover'}}
                                     className="friend-card-header"
-                                    avatar="https://www.themarysue.com/wp-content/uploads/2015/12/avatar.jpeg"/>
+                                    data-user={this.props.email}
+                                    avatar={this.state.image}/>
                         <CardActions>
                             {this.getActions()}
                         </CardActions>

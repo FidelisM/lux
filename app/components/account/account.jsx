@@ -7,7 +7,9 @@ import Fingerprint2 from 'fingerprintjs2';
 
 import RaisedButton from 'material-ui/RaisedButton';
 import TextField from 'material-ui/TextField';
+import IconButton from 'material-ui/IconButton';
 import Notification from 'Components/nofification/notification';
+import Badge from 'material-ui/Badge';
 
 import services from 'Services';
 import serviceManager from 'ServiceManager';
@@ -17,6 +19,7 @@ import AlertDialog from 'Widgets/alertDialog/alertDialog';
 import {grey500, pinkA200} from 'material-ui/styles/colors';
 import UploadIcon from 'material-ui/svg-icons/file/file-upload';
 import PhotoIcon from 'material-ui/svg-icons/image/add-a-photo';
+import DeleteIcon from 'material-ui/svg-icons/navigation/cancel';
 
 import Subheader from 'material-ui/Subheader';
 import Divider from 'material-ui/Divider';
@@ -37,7 +40,8 @@ class Account extends React.Component {
             initialUsername: this.props.username,
             initialTelephone: this.props.telephone,
             image: {},
-            isFileSelected: false
+            isFileSelected: false,
+            isPictureTaken: false
         }
     }
 
@@ -101,7 +105,12 @@ class Account extends React.Component {
             return response.blob();
         }).then(function (imgBlob) {
             let image = document.querySelector('#image-canvas');
-            image.src = window.URL.createObjectURL(imgBlob);
+
+            if (/image/.test(imgBlob.type)) {
+                image.src = window.URL.createObjectURL(imgBlob);
+            } else {
+                image.src = './default.jpg';
+            }
         });
     }
 
@@ -276,7 +285,16 @@ class Account extends React.Component {
                 },
                 closeCB: () => {
                     let video = document.getElementById('live-photo'),
-                        track = localstream.getTracks()[0];
+                        track = localstream.getTracks()[0],
+                        profilePicEl = document.querySelector('#image-canvas'),
+                        imageCapture = new ImageCapture(track);
+
+                    /*self.setState({
+                        image: localstream,
+                        isPictureTaken: true
+                    });
+
+                    profilePicEl.src = window.URL.createObjectURL(localstream);*/
 
                     video.src = '';
                     video.pause();
@@ -308,11 +326,13 @@ class Account extends React.Component {
                         <Divider/>
                         <div className="my-account-view" id="my-account-view">
                             <div className="avatar-actions">
-                                <div className="profile-picture">
-                                    <img id="image-canvas" className="img-circle"/>
-                                </div>
+                                <Badge badgeContent={<IconButton tooltip="Delete"><DeleteIcon/></IconButton>}>
+                                    <div className="profile-picture">
+                                        <img id="image-canvas" className="img-circle"/>
+                                    </div>
+                                </Badge>
                                 <div className="action-buttons">
-                                    <RaisedButton icon={<PhotoIcon/>}
+                                    <RaisedButton icon={<PhotoIcon/>} primary={this.state.isPictureTaken}
                                                   onClick={this.openCamera.bind(this)}/>
                                     <RaisedButton icon={<UploadIcon/>} style={{marginLeft: 20}}
                                                   containerElement='label' primary={this.state.isFileSelected}>

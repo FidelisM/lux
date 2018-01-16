@@ -28,10 +28,17 @@ export default class Message extends React.Component {
             }).then(function (imgBlob) {
                 let images = document.querySelectorAll('[data-author="' + self.props.members[i] + '"]');
 
-                [].forEach.call(images, function (image) {
-                        image.src = window.URL.createObjectURL(imgBlob);
-                    }
-                );
+                if (/image/.test(imgBlob.type)) {
+                    [].forEach.call(images, function (image) {
+                            image.src = window.URL.createObjectURL(imgBlob);
+                        }
+                    );
+                } else {
+                    [].forEach.call(images, function (image) {
+                            image.src = './default.jpg';
+                        }
+                    );
+                }
             });
         }
     }
