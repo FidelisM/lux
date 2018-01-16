@@ -126,6 +126,25 @@ class Greeter extends React.Component {
         ReactDOM.render(<Help/>, document.getElementById('overlay'));
     }
 
+    openMyAccount() {
+        let container = document.getElementsByClassName('my-account')[0],
+            mesengerContainer = document.getElementsByClassName('messenger')[0];
+
+        this.socket.removeAllListeners();
+
+        mesengerContainer.style.display = 'none';
+        container.style.display = 'flex';
+
+        ReactDOM.unmountComponentAtNode(document.getElementsByClassName('messenger')[0]);
+        ReactDOM.unmountComponentAtNode(container);
+
+        ReactDOM.render(<Provider store={this.context.store}><MuiThemeProvider><Account
+            initializeSocket={this._initializeSocket.bind(this)}/></MuiThemeProvider>
+        </Provider>, container);
+    }
+
+    // Rooms
+
     handleRoomNameChange(evt) {
         let roomName = evt.currentTarget.value;
 
@@ -234,23 +253,6 @@ class Greeter extends React.Component {
         });
     }
 
-    openMyAccount() {
-        let container = document.getElementsByClassName('my-account')[0],
-            mesengerContainer = document.getElementsByClassName('messenger')[0];
-
-        this.socket.removeAllListeners();
-
-        mesengerContainer.style.display = 'none';
-        container.style.display = 'flex';
-
-        ReactDOM.unmountComponentAtNode(document.getElementsByClassName('messenger')[0]);
-        ReactDOM.unmountComponentAtNode(container);
-
-        ReactDOM.render(<Provider store={this.context.store}><MuiThemeProvider><Account
-            initializeSocket={this._initializeSocket.bind(this)}/></MuiThemeProvider>
-        </Provider>, container);
-    }
-
     _getRooms() {
         let self = this,
             token = localStorage.getItem('token'),
@@ -308,110 +310,7 @@ class Greeter extends React.Component {
         console.log(response);
     }
 
-    handleAddFriendClick() {
-        let self = this,
-            props = {
-                width: 500,
-                title: 'Add Friend',
-                successLabel: 'Add',
-                proceedCB: self.addFriend.bind(self),
-                nextDisabled: true,
-                content: () => {
-                    return (<TextField
-                        ref={function (textField) {
-                            self.addFriendEmailTextField = textField;
-                        }.bind(this)}
-                        floatingLabelText="E-mail Address"
-                        errorText={self.state.emailErrorText}
-                        onChange={self.handleFriendEmailChange.bind(self)}
-                    />)
-                }
-            },
-            container = document.getElementById('overlay');
-
-        ReactDOM.unmountComponentAtNode(container);
-        ReactDOM.render(<PromptDialog {...props} ref={function (promptDialog) {
-            self.promptDialog = promptDialog;
-        }.bind(this)}/>, container);
-    }
-
-    handleFriendEmailChange(evt) {
-        let email = evt.currentTarget.value,
-            re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-
-        if (!re.test(email.toLowerCase())) {
-            this.addFriendEmailTextField.setState({
-                errorText: 'Please enter a valid email address'
-            });
-
-            this.promptDialog.setState({
-                nextDisabled: true
-            });
-
-            return false;
-        }
-
-        this.addFriendEmailTextField.setState({
-            errorText: ''
-        });
-
-        this.promptDialog.setState({
-            nextDisabled: false
-        });
-
-        this.props.dispatch({
-            type: 'ADD_FRIEND',
-            friend: email
-        });
-    }
-
-    addFriend() {
-        let self = this,
-            state = this.context.store.getState().greeterReducer,
-            token = localStorage.getItem('token'),
-            options = {
-                headers: {
-                    Authorization: token
-                },
-                data: {
-                    friend: state.friend
-                },
-                url: services.friend.add
-            };
-
-        let email = state.friend,
-            re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-
-        if (!re.test(email.toLowerCase())) {
-            this.setState({
-                emailErrorText: 'Please enter a valid email address'
-            });
-
-            return;
-        }
-
-        serviceManager.post(options).then(function (response) {
-            (response.success) ? self._handleAddFriendSuccess(response) : self._handleAddFriendFailure(response);
-        }).catch(self._handleAddFriendFailure.bind(self));
-    }
-
-    _handleAddFriendSuccess(response) {
-        let container = document.getElementById('snackbar');
-
-        if (response.msg) {
-            ReactDOM.unmountComponentAtNode(container);
-            ReactDOM.render(<Notification open={true} message={response.msg}/>, container);
-        }
-    }
-
-    _handleAddFriendFailure(response) {
-        let container = document.getElementById('snackbar');
-
-        if (response.msg) {
-            ReactDOM.unmountComponentAtNode(container);
-            ReactDOM.render(<Notification open={true} message={response.msg}/>, container);
-        }
-    }
+    // Members
 
     handleEditMembersClick(roomID, roomName) {
         let self = this,
@@ -576,6 +475,113 @@ class Greeter extends React.Component {
     }
 
     _handleRemoveMemberFailure(response) {
+        let container = document.getElementById('snackbar');
+
+        if (response.msg) {
+            ReactDOM.unmountComponentAtNode(container);
+            ReactDOM.render(<Notification open={true} message={response.msg}/>, container);
+        }
+    }
+
+    // Friends
+
+    handleAddFriendClick() {
+        let self = this,
+            props = {
+                width: 500,
+                title: 'Add Friend',
+                successLabel: 'Add',
+                proceedCB: self.addFriend.bind(self),
+                nextDisabled: true,
+                content: () => {
+                    return (<TextField
+                        ref={function (textField) {
+                            self.addFriendEmailTextField = textField;
+                        }.bind(this)}
+                        floatingLabelText="E-mail Address"
+                        errorText={self.state.emailErrorText}
+                        onChange={self.handleFriendEmailChange.bind(self)}
+                    />)
+                }
+            },
+            container = document.getElementById('overlay');
+
+        ReactDOM.unmountComponentAtNode(container);
+        ReactDOM.render(<PromptDialog {...props} ref={function (promptDialog) {
+            self.promptDialog = promptDialog;
+        }.bind(this)}/>, container);
+    }
+
+    handleFriendEmailChange(evt) {
+        let email = evt.currentTarget.value,
+            re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
+        if (!re.test(email.toLowerCase())) {
+            this.addFriendEmailTextField.setState({
+                errorText: 'Please enter a valid email address'
+            });
+
+            this.promptDialog.setState({
+                nextDisabled: true
+            });
+
+            return false;
+        }
+
+        this.addFriendEmailTextField.setState({
+            errorText: ''
+        });
+
+        this.promptDialog.setState({
+            nextDisabled: false
+        });
+
+        this.props.dispatch({
+            type: 'ADD_FRIEND',
+            friend: email
+        });
+    }
+
+    addFriend() {
+        let self = this,
+            state = this.context.store.getState().greeterReducer,
+            token = localStorage.getItem('token'),
+            options = {
+                headers: {
+                    Authorization: token
+                },
+                data: {
+                    friend: state.friend
+                },
+                url: services.friend.add
+            };
+
+        let email = state.friend,
+            re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
+        if (!re.test(email.toLowerCase())) {
+            this.setState({
+                emailErrorText: 'Please enter a valid email address'
+            });
+
+            return;
+        }
+
+        serviceManager.post(options).then(function (response) {
+            (response.success) ? self._handleAddFriendSuccess(response) : self._handleAddFriendFailure(response);
+        }).catch(self._handleAddFriendFailure.bind(self));
+    }
+
+    _handleAddFriendSuccess(response) {
+        let container = document.getElementById('snackbar');
+
+        if (response.msg) {
+            ReactDOM.unmountComponentAtNode(container);
+            ReactDOM.render(<Notification open={true} message={response.msg}/>, container);
+        }
+    }
+
+    _handleAddFriendFailure(response) {
         let container = document.getElementById('snackbar');
 
         if (response.msg) {

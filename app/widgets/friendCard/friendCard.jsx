@@ -37,7 +37,7 @@ export default class FriendCard extends React.Component {
                 })
             } else{
                 self.setState({
-                    image: './default.jpg'
+                    image: './images/default.jpg'
                 })
             }
         });

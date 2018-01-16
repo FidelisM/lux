@@ -109,7 +109,7 @@ class Account extends React.Component {
             if (/image/.test(imgBlob.type)) {
                 image.src = window.URL.createObjectURL(imgBlob);
             } else {
-                image.src = './default.jpg';
+                image.src = './images/default.jpg';
             }
         });
     }

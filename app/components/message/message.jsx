@@ -35,7 +35,7 @@ export default class Message extends React.Component {
                     );
                 } else {
                     [].forEach.call(images, function (image) {
-                            image.src = './default.jpg';
+                            image.src = './images/default.jpg';
                         }
                     );
                 }

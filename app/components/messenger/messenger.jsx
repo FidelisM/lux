@@ -116,10 +116,10 @@ class Messenger extends React.Component {
 
     render() {
         return (
-            <Draggable handle=".messenger-component .header" bounds={'parent'}>
+            <Draggable handle=".messenger-component .drag-handle" bounds={'parent'}>
                 <div className={"messenger-component"}>
                     <div className="content">
-                        <div className="header">
+                        <div className="header drag-handle">
                             <Subheader>Room: {this.props.roomName}</Subheader>
                         </div>
                         <Divider/>
