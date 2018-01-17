@@ -1,14 +1,6 @@
-const defaultState = {
-    title: 'spoqn',
-    room: '',
-    rooms: [],
-    friend: '',
-    friends: [],
-    members: [],
-    drawerOpen: false
-};
+import defaultState from 'Common/state/defaults';
 
-export default function greeterReducer(state = defaultState, action) {
+export default function greeterReducer(state = defaultState.greeterReducer, action) {
     switch (action.type) {
         case 'SET_DRAWER':
             return {

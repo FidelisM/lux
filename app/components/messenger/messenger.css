@@ -10,7 +10,7 @@
     flex: 0 0 40%;
 }
 
-.messenger-component .content .header {
+.messenger-component .content .header.drag-handle {
     cursor: move;
 }
 

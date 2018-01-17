@@ -1,9 +1,6 @@
-const defaultState = {
-    newMessage: '',
-    messages: []
-};
+import defaultState from 'Common/state/defaults';
 
-export default function messengerReducer(state = defaultState, action) {
+export default function messengerReducer(state = defaultState.messengerReducer, action) {
     switch (action.type) {
         case 'ADD_NEW_MESSAGE':
             return Object.assign({}, state, {

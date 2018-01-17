@@ -1,14 +1,6 @@
-const defaultState = {
-    email: '',
-    password: '',
-    passwordConfirm: '',
-    currentPassword: '',
-    username: '',
-    telephone: '',
-    auth: ''
-};
+import defaultState from 'Common/state/defaults';
 
-export default function authReducer(state = defaultState, action) {
+export default function authReducer(state = defaultState.authReducer, action) {
     switch (action.type) {
         case 'SET_EMAIL':
             return {

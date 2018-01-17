@@ -114,12 +114,10 @@ class Greeter extends React.Component {
 
         localStorage.removeItem('token');
 
-        self.props.dispatch({
-            type: 'SET_AUTH',
-            auth: ''
-        });
+        self.props.dispatch({type: 'USER_LOGOUT'});
 
         self.context.store.dispatch(push('/login'));
+
     }
 
     handleHelp() {
