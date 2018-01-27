@@ -92,7 +92,7 @@ router.get('/spoqn/user/image/:email', function (request, response) {
                 return response.send(user.image.data);
             }
 
-            return response.status(404).send({
+            return response.send({
                 success: false,
                 msg: 'Image Not Found'
             });
@@ -117,7 +117,7 @@ router.get('/spoqn/user/image', function (request, response) {
                 return response.send(user.image.data);
             }
 
-            return response.status(404).send({
+            return response.send({
                 success: false,
                 msg: 'Image Not Found'
             });

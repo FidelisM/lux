@@ -9,37 +9,96 @@ import services from "Services";
 export default class Message extends React.Component {
     constructor(props) {
         super(props);
+
+        this.state = {
+            loadedImages: {},
+            DEFAULT_IMAGE_PATH: './images/default.jpg'
+        };
+    }
+
+    componentDidMount() {
+        this._loadImages();
     }
 
     componentDidUpdate() {
-        this._getImages();
+        let self = this,
+            images = document.querySelectorAll('img[src=""]');
+
+        [].forEach.call(images, function (image) {
+                let key = image.getAttribute('data-author');
+                if (self.state.loadedImages.hasOwnProperty(key)) {
+                    if (typeof self.state.loadedImages[key] === 'string') {
+                        image.src = self.state.loadedImages[key];
+                        return false;
+                    }
+                    image.src = window.URL.createObjectURL(self.state.loadedImages[key]);
+                }
+            }
+        );
+
+        this.focusLatestMessage();
     }
 
-    _getImages() {
+    focusLatestMessage() {
+        let element = document.querySelectorAll('.chat-content:last-of-type')[0];
+
+        if (element) {
+            element.scrollIntoView();
+        }
+    }
+
+    _loadImages() {
+        let self = this;
+
+        for (let i = 0; i < this.props.members.length; i++) {
+            (function (email) {
+                self._getImage(email).then(function (imgBlob) {
+                    if (/image/.test(imgBlob.type)) {
+                        self._appendImage(imgBlob, email);
+                    } else {
+                        self._appendImage(null, email);
+                    }
+                });
+            })(self.props.members[i]);
+        }
+    }
+
+    _getImage(email) {
         let self = this,
             token = localStorage.getItem('token'),
             headers = {
                 Authorization: token
-            };
+            }, promise;
 
-        for (let i = 0; i < this.props.members.length; i++) {
-            fetch(services.user.getImagebyEmail.replace(':email', self.props.members[i]), {headers: new Headers(headers)}).then(function (response) {
-                return response.blob();
-            }).then(function (imgBlob) {
-                let images = document.querySelectorAll('[data-author="' + self.props.members[i] + '"]');
+        promise = fetch(services.user.getImagebyEmail.replace(':email', email), {headers: new Headers(headers)}).then(function (response) {
+            return response.blob();
+        });
 
-                if (/image/.test(imgBlob.type)) {
-                    [].forEach.call(images, function (image) {
-                            image.src = window.URL.createObjectURL(imgBlob);
-                        }
-                    );
-                } else {
-                    [].forEach.call(images, function (image) {
-                            image.src = './images/default.jpg';
-                        }
-                    );
+        promise.then(function (imgBlob) {
+            if (imgBlob && /image/.test(imgBlob.type)) {
+                self.state.loadedImages[email] = imgBlob;
+            } else {
+                self.state.loadedImages[email] = self.state.DEFAULT_IMAGE_PATH;
+            }
+        });
+
+        return promise;
+    }
+
+    _appendImage(imgBlob, email) {
+        let self = this,
+            images = document.querySelectorAll('[data-author="' + email + '"]');
+
+        if (imgBlob && /image/.test(imgBlob.type)) {
+            [].forEach.call(images, function (image) {
+                    image.src = window.URL.createObjectURL(imgBlob);
                 }
-            });
+            );
+        } else {
+            [].forEach.call(images, function (image) {
+                    image.src = self.state.DEFAULT_IMAGE_PATH;
+                }
+            );
         }
     }
 
@@ -67,7 +126,7 @@ export default class Message extends React.Component {
                                     </div>
                                     <div className={"chat-head inline-block right"}>
                                          <span className="chat-img">
-                                               <img className={"img-circle user-avatar"}
+                                               <img src={''} className={"img-circle user-avatar"}
                                                     data-author={message.authorEmail}/>
                                          </span>
                                     </div>
@@ -79,7 +138,7 @@ export default class Message extends React.Component {
                             <div className="chat-content" key={index}>
                                 <div className={"chat-head inline-block"}>
                                      <span className="chat-img">
-                                            <img className={"img-circle user-avatar"}
+                                            <img src={''} className={"img-circle user-avatar"}
                                                  data-author={message.authorEmail}/>
                                      </span>
                                 </div>

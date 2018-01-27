@@ -28,6 +28,20 @@ let io;
 router.use(express.static('dist'));
 passport.use('custom-jwt', strategy);
 
+for (let index = 0; index < customRouters.length; index++) {
+    customRouters[index].getDB = function () {
+        return mongoose.connection;
+    };
+
+    customRouters[index].getPassport = function () {
+        return passport;
+    };
+
+    customRouters[index].getSocketIO = function () {
+        return io;
+    };
+}
+
 mongoose.connect(config.database, {useMongoClient: true}).then(function () {
     app.use(morgan('dev'));
 
@@ -79,9 +93,9 @@ mongoose.connect(config.database, {useMongoClient: true}).then(function () {
                 timestamp: moment().unix() * 1000
             });
 
-            saveMessage(data, function () {
-                socket.in(data.room).emit('new-message');
-                socket.emit('new-message');
+            saveMessage(data, function (message) {
+                socket.in(data.room).emit('new-message', data);
+                socket.emit('new-message', data);
             });
         });
     });
@@ -90,20 +104,6 @@ mongoose.connect(config.database, {useMongoClient: true}).then(function () {
 });
 
 mongoose.Promise = global.Promise;
-
-for (let index = 0; index < customRouters.length; index++) {
-    customRouters[index].getDB = function () {
-        return mongoose.connection;
-    };
-
-    customRouters[index].getPassport = function () {
-        return passport;
-    };
-
-    customRouters[index].getSocketIO = function () {
-        return io;
-    };
-}
 
 saveMessage = function (data, callback) {
     let ObjectId = mongoose.Types.ObjectId,

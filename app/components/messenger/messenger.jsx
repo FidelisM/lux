@@ -41,18 +41,6 @@ class Messenger extends React.Component {
         this.props.socket.emit('leave', this.props.roomID);
     }
 
-    componentDidUpdate() {
-        this.focusLatestMessage();
-    }
-
-    focusLatestMessage() {
-        let element = document.querySelectorAll('.chat-content:last-of-type')[0];
-
-        if (element) {
-            element.scrollIntoView();
-        }
-    }
-
     _getMessages() {
         let self = this,
             token = localStorage.getItem('token'),
@@ -83,14 +71,25 @@ class Messenger extends React.Component {
     }
 
     _handleMessagesLoadFailure() {
-
+        /*this.props.dispatch({
+            type: 'UPDATE_MESSAGE_LIST',
+            messages: []
+        });*/
     }
 
     _initializeSocket() {
         let self = this;
 
         this.props.socket.emit('room', self.props.roomID);
-        this.props.socket.on('new-message', self._getMessages.bind(self));
+        this.props.socket.on('new-message', function (data) {
+            let messages = self.props.messages.slice();
+            messages.push(data.message);
+
+            self.props.dispatch({
+                type: 'UPDATE_MESSAGE_LIST',
+                messages: messages
+            });
+        });
     }
 
     sendMessage() {
