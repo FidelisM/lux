@@ -2,9 +2,11 @@ import React from 'react';
 import moment from 'moment';
 
 import Divider from 'material-ui/Divider';
+import Notification from 'Components/notification/notification';
 
 import './message.css';
 import services from "Services";
+import ReactDOM from "react-dom";
 
 export default class Message extends React.Component {
     constructor(props) {
@@ -72,6 +74,15 @@ export default class Message extends React.Component {
 
         promise = fetch(services.user.getImagebyEmail.replace(':email', email), {headers: new Headers(headers)}).then(function (response) {
             return response.blob();
+        }).catch(function (response) {
+            let container = document.getElementById('snackbar');
+
+            if (response && response.msg) {
+                ReactDOM.unmountComponentAtNode(container);
+                ReactDOM.render(<Notification open={true} message={response.msg}/>, container);
+            }
+
+            return response;
         });
 
         promise.then(function (imgBlob) {

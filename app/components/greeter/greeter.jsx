@@ -10,7 +10,7 @@ import io from 'socket.io-client';
 
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 
-import Notification from 'Components/nofification/notification';
+import Notification from 'Components/notification/notification';
 import Account from 'Components/account/account';
 import Messenger from 'Components/messenger/messenger';
 import PromptDialog from 'Widgets/promptDialog/promptDialog';
@@ -41,7 +41,6 @@ import InfoIcon from 'material-ui/svg-icons/action/info-outline';
 import DeleteIcon from 'material-ui/svg-icons/action/delete-forever';
 
 import './greeter.css';
-
 
 const groupAddIconStyles = {
     fill: '#FFFFFF',
@@ -214,7 +213,7 @@ class Greeter extends React.Component {
     _handleCreateSuccess(response) {
         let container = document.getElementById('snackbar');
 
-        if (response.msg) {
+        if (response && response.msg) {
             ReactDOM.unmountComponentAtNode(container);
             ReactDOM.render(<Notification open={true} message={response.msg}/>, container);
         }
@@ -225,7 +224,7 @@ class Greeter extends React.Component {
     _handleCreateFailure(response) {
         let container = document.getElementById('snackbar');
 
-        if (response.msg) {
+        if (response && response.msg) {
             ReactDOM.unmountComponentAtNode(container);
             ReactDOM.render(<Notification open={true} message={response.msg}/>, container);
         }
@@ -305,7 +304,12 @@ class Greeter extends React.Component {
     }
 
     _handleFetchFailure(response) {
-        console.log(response);
+        let container = document.getElementById('snackbar');
+
+        if (response && response.msg) {
+            ReactDOM.unmountComponentAtNode(container);
+            ReactDOM.render(<Notification open={true} message={response.msg}/>, container);
+        }
     }
 
     // Members
@@ -378,7 +382,7 @@ class Greeter extends React.Component {
     _handleAddMemberSuccess(response) {
         let container = document.getElementById('snackbar');
 
-        if (response.msg) {
+        if (response && response.msg) {
             ReactDOM.unmountComponentAtNode(container);
             ReactDOM.render(<Notification open={true} message={response.msg}/>, container);
         }
@@ -392,7 +396,7 @@ class Greeter extends React.Component {
     _handleAddMemberFailure(response) {
         let container = document.getElementById('snackbar');
 
-        if (response.msg) {
+        if (response && response.msg) {
             ReactDOM.unmountComponentAtNode(container);
             ReactDOM.render(<Notification open={true} message={response.msg}/>, container);
         }
@@ -427,10 +431,10 @@ class Greeter extends React.Component {
         });
     }
 
-    _handleMemberLoadFailure() {
+    _handleMemberLoadFailure(response) {
         let container = document.getElementById('snackbar');
 
-        if (response.msg) {
+        if (response && response.msg) {
             ReactDOM.unmountComponentAtNode(container);
             ReactDOM.render(<Notification open={true} message={response.msg}/>, container);
         }
@@ -461,7 +465,7 @@ class Greeter extends React.Component {
     _handleRemoveMemberSuccess(response) {
         let container = document.getElementById('snackbar');
 
-        if (response.msg) {
+        if (response && response.msg) {
             ReactDOM.unmountComponentAtNode(container);
             ReactDOM.render(<Notification open={true} message={response.msg}/>, container);
         }
@@ -475,7 +479,7 @@ class Greeter extends React.Component {
     _handleRemoveMemberFailure(response) {
         let container = document.getElementById('snackbar');
 
-        if (response.msg) {
+        if (response && response.msg) {
             ReactDOM.unmountComponentAtNode(container);
             ReactDOM.render(<Notification open={true} message={response.msg}/>, container);
         }
@@ -573,7 +577,7 @@ class Greeter extends React.Component {
     _handleAddFriendSuccess(response) {
         let container = document.getElementById('snackbar');
 
-        if (response.msg) {
+        if (response && response.msg) {
             ReactDOM.unmountComponentAtNode(container);
             ReactDOM.render(<Notification open={true} message={response.msg}/>, container);
         }
@@ -582,7 +586,7 @@ class Greeter extends React.Component {
     _handleAddFriendFailure(response) {
         let container = document.getElementById('snackbar');
 
-        if (response.msg) {
+        if (response && response.msg) {
             ReactDOM.unmountComponentAtNode(container);
             ReactDOM.render(<Notification open={true} message={response.msg}/>, container);
         }
@@ -613,8 +617,13 @@ class Greeter extends React.Component {
         });
     }
 
-    _handleFriendsLoadFailure() {
+    _handleFriendsLoadFailure(response) {
+        let container = document.getElementById('snackbar');
 
+        if (response && response.msg) {
+            ReactDOM.unmountComponentAtNode(container);
+            ReactDOM.render(<Notification open={true} message={response.msg}/>, container);
+        }
     }
 
     render() {

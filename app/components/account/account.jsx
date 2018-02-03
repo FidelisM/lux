@@ -8,7 +8,7 @@ import Fingerprint2 from 'fingerprintjs2';
 import RaisedButton from 'material-ui/RaisedButton';
 import TextField from 'material-ui/TextField';
 import IconButton from 'material-ui/IconButton';
-import Notification from 'Components/nofification/notification';
+import Notification from 'Components/notification/notification';
 import Badge from 'material-ui/Badge';
 
 import services from 'Services';
@@ -111,7 +111,14 @@ class Account extends React.Component {
             } else {
                 image.src = './images/default.jpg';
             }
-        });
+        }).catch(function (response) {
+            let container = document.getElementById('snackbar');
+
+            if (response && response.msg) {
+                ReactDOM.unmountComponentAtNode(container);
+                ReactDOM.render(<Notification open={true} message={response.msg}/>, container);
+            }
+        })
     }
 
     handleSave() {
@@ -223,7 +230,7 @@ class Account extends React.Component {
     _handleSaveFailure(response) {
         let container = document.getElementById('snackbar');
 
-        if (response.msg) {
+        if (response && response.msg) {
             ReactDOM.unmountComponentAtNode(container);
             ReactDOM.render(<Notification open={true} message={response.msg}/>, container);
         }

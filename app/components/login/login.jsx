@@ -9,7 +9,7 @@ import {withRouter} from 'react-router-dom';
 
 import TextField from 'material-ui/TextField';
 import FlatButton from 'material-ui/FlatButton';
-import Notification from 'Components/nofification/notification';
+import Notification from 'Components/notification/notification';
 
 import kute from 'kute.js'
 import Fingerprint2 from 'fingerprintjs2'
@@ -187,7 +187,7 @@ class Login extends React.Component {
     _handleAuthFailure(response) {
         let container = document.getElementById('snackbar');
 
-        if (response.msg) {
+        if (response && response.msg) {
             ReactDOM.unmountComponentAtNode(container);
             ReactDOM.render(<Notification open={true} message={response.msg}/>, container);
         }
