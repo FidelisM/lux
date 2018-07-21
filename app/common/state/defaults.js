@@ -17,6 +17,12 @@ export default {
         members: [],
         drawerOpen: false
     },
+    marketReducer: {
+        title: '$poqn',
+        watchListName: '',
+        watchLists: [],
+        drawerOpen: false
+    },
     messengerReducer: {
         newMessage: '',
         messages: []

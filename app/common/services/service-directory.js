@@ -27,5 +27,9 @@ export default {
         image: '/spoqn/user/update/image',
         getMyImage: '/spoqn/user/image',
         getImagebyEmail: '/spoqn/user/image/:email'
+    },
+    market: {
+        create: '/spoqn/market/create',
+        watchLists: '/spoqn/market/watchlists'
     }
 }

@@ -1,0 +1,8 @@
+.friend-card {
+    display: inline-flex;
+    margin: 10px;
+}
+
+.friend-card .friend-card-header img {
+    object-fit: cover;
+}
