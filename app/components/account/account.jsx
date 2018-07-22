@@ -333,7 +333,7 @@ class Account extends React.Component {
                                 </Badge>
                                 <div className="action-buttons">
                                     <RaisedButton icon={<PhotoIcon/>} primary={this.state.isPictureTaken}
-                                                  onClick={this.openCamera.bind(this)}/>
+                                                  onClick={this.openCamera.bind(this)} disabled={true}/>
                                     <RaisedButton icon={<UploadIcon/>} style={{marginLeft: 20}}
                                                   containerElement='label' primary={this.state.isFileSelected}>
                                         <input type="file" style={{display: 'none'}}
@@ -346,6 +346,7 @@ class Account extends React.Component {
                                            data-action="USERNAME" data-field="username"
                                            value={this.props.username} fullWidth={true}
                                            onChange={this.handleInputChange.bind(this)}
+                                           disabled={(this.props.username === 'Test')}
                                            errorText={this.state.usernameErrorText}/>
                                 <TextField type="email" floatingLabelText="Email Address" className="my-account-email"
                                            data-action="EMAIL" data-field="email" value={this.props.email}
@@ -358,11 +359,13 @@ class Account extends React.Component {
                                            className="my-account-new-password" fullWidth={true}
                                            data-action="PASSWORD" data-field="password"
                                            onChange={this.handleInputChange.bind(this)}
+                                           disabled={(this.props.username === 'Test')}
                                            errorText={this.state.passwordErrorText}/>
                                 <TextField type="password" floatingLabelText="Confirm New Password"
                                            className="confirm-my-account-password" fullWidth={true}
                                            data-action="CONF_PASSWORD" data-field="passwordConfirm"
                                            onChange={this.handleInputChange.bind(this)}
+                                           disabled={(this.props.username === 'Test')}
                                            errorText={this.state.passwordConfirmErrorText}/>
                                 <TextField type="tel" floatingLabelText="Phone Number" className="my-account-telephone"
                                            data-action="TEL" value={this.props.telephone} fullWidth={true}
