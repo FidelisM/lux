@@ -13,28 +13,21 @@ export default class Help extends React.Component {
             proceedCB: () => {
             },
             content: () => {
-                return (<div>
-                    <b>Lorem</b> ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
-                    labore et dolore magna aliqua. Feugiat scelerisque varius morbi enim nunc faucibus a.
-                    Id faucibus nisl tincidunt eget nullam non. Porttitor
-                    massa id neque aliquam vestibulum morbi blandit cursus risus.
-                    Blandit massa enim nec dui nunc mattis enim ut. In arcu cursus euismod quis viverra nibh cras
-                    pulvinar.
+                return (<p>
+                    <b>Tools:</b>
                     <br/>
                     <br/>
-                    Enim blandit volutpat maecenas volutpat blandit aliquam etiam erat velit. Sit amet volutpat
-                    consequat mauris nunc congue. Cras tincidunt lobortis feugiat vivamus at augue eget arcu dictum.
-                    In cursus turpis massa tincidunt dui ut ornare lectus sit. Et leo duis ut diam quam nulla porttitor
-                    massa id.
+                    Create Room.
                     <br/>
                     <br/>
-                    Adipiscing bibendum est ultricies integer quis auctor. Faucibus turpis in eu mi bibendum.
-                    Id cursus metus aliquam eleifend mi in nulla posuere. Eget felis eget nunc lobortis mattis aliquam
-                    faucibus purus in.
-                    Massa sed elementum tempus egestas sed sed risus pretium quam. Massa placerat duis ultricies lacus
-                    sed turpis.
-                    Sit amet mauris commodo quis imperdiet massa tincidunt.
-                </div>)
+                    Add Friend.
+                    <br/>
+                    <br/>
+                    Update Profile Picture.
+                    <br/>
+                    <br/>
+                    Chat in real-time.
+                </p>)
             }
         }
     }

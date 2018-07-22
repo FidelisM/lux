@@ -20,7 +20,6 @@ import FriendCard from 'Widgets/friendCard/friendCard';
 import services from 'Services';
 import serviceManager from 'ServiceManager';
 
-import FlatButton from 'material-ui/FlatButton';
 import IconMenu from 'material-ui/IconMenu';
 import MenuItem from 'material-ui/MenuItem';
 import {List, ListItem} from 'material-ui/List';
@@ -37,6 +36,7 @@ import PencilIcon from 'material-ui/svg-icons/content/create';
 import BlockIcon from 'material-ui/svg-icons/content/block';
 import SettingsIcon from 'material-ui/svg-icons/action/account-circle';
 import HelpIcon from 'material-ui/svg-icons/action/help';
+import AccountIcon from 'material-ui/svg-icons/action/settings-applications';
 import InfoIcon from 'material-ui/svg-icons/action/info-outline';
 import DeleteIcon from 'material-ui/svg-icons/action/delete-forever';
 
@@ -52,9 +52,14 @@ const groupAddIconStyles = {
     cursor: 'pointer'
 };
 
-const flatButtonStyles = {
-    color: '#FFFFFF',
-    borderLeft: '1px white solid'
+const accountIconStyles = {
+    fill: '#FFFFFF',
+    height: 30,
+    width: 30,
+    paddingLeft: 10,
+    verticalAlign: 'middle',
+    cursor: 'pointer',
+    'border-left': '1px solid white'
 };
 
 const iconMenuStyles = {
@@ -668,7 +673,7 @@ class Greeter extends React.Component {
 
 const Logged = (props) => (
     <IconMenu {...props} style={iconMenuStyles}
-              iconButtonElement={<FlatButton label={props.label} style={flatButtonStyles}/>}
+              iconButtonElement={<AccountIcon title={props.label} style={accountIconStyles}/>}
               targetOrigin={{horizontal: 'right', vertical: 'top'}}
               anchorOrigin={{horizontal: 'right', vertical: 'bottom'}}>
         <MenuItem onClick={props['data-my-account']} primaryText='My Account' rightIcon={<SettingsIcon/>}/>
